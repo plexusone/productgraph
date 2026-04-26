@@ -38,3 +38,6 @@ deployments/docker/data/
 tmp/
 *.tmp
 *.log
+
+# MkDocs
+site/
