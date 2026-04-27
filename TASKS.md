@@ -169,20 +169,20 @@
   - Maps ProductGraph events to omnidxi events
   - Supports all event types and properties
 
-- [ ] Add adapter tests
+- [x] Add adapter tests
   - Unit tests for event mapping
   - Mock tracker for isolation
   - Test all event types
   - Test context/properties extraction
 
-- [ ] Wire adapter to ingestion service
+- [x] Wire adapter to ingestion service
   - Add to `cmd/ingestion/main.go`
   - Create tracker from config
   - Chain with existing publisher (fan-out)
 
 ### 1.5.2 Analytics Configuration
 
-- [ ] Add config schema
+- [x] Add config schema
   ```yaml
   analytics:
     enabled: true
@@ -195,8 +195,8 @@
         token: ${MIXPANEL_TOKEN}
   ```
 
-- [ ] Implement config loading
-  - Viper or env-based config
+- [x] Implement config loading
+  - Env-based config via `internal/config`
   - Validate required fields when enabled
   - Graceful degradation if provider unavailable
 
@@ -206,12 +206,12 @@
 
 ### 1.5.3 Fan-out Publisher
 
-- [ ] Create multi-publisher
+- [x] Create multi-publisher
   - Wraps multiple `events.Publisher` implementations
   - Parallel dispatch to all publishers
   - Aggregate errors without blocking
 
-- [ ] Integrate with event handler
+- [x] Integrate with event handler
   - Memory publisher (existing)
   - Analytics adapter (new)
   - Future: Kafka publisher

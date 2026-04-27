@@ -7,6 +7,32 @@
   "maintainers": ["plexusone", "johncwang@gmail.com"],
   "releases": [
     {
+      "version": "v0.2.0",
+      "date": "2026-04-27",
+      "commit": "5b77fc4",
+      "highlights": [
+        { "description": "Analytics integration with Amplitude and Mixpanel via omnidxi" },
+        { "description": "Fan-out publisher for multi-destination event dispatch" },
+        { "description": "Environment-based configuration system" }
+      ],
+      "added": [
+        { "description": "Analytics adapter mapping ProductGraph events to omnidxi format", "commit": "e7eda75" },
+        { "description": "MultiPublisher for parallel fan-out to multiple event destinations", "commit": "777d9a6" },
+        { "description": "Config package with environment variable support", "commit": "5b77fc4" },
+        { "description": "Amplitude provider integration via omni-amplitude", "commit": "5b77fc4" },
+        { "description": "Mixpanel provider integration via omni-mixpanel", "commit": "5b77fc4" }
+      ],
+      "documentation": [
+        { "description": "v0.2.0 ideation document for analytics adapters and SDK design", "commit": "5fbfdaf" },
+        { "description": "Phase 1.5 analytics integration tasks", "commit": "8b1f160" }
+      ],
+      "dependencies": [
+        { "description": "github.com/plexusone/omnidxi v0.1.0", "commit": "e7eda75" },
+        { "description": "github.com/plexusone/omni-amplitude v0.1.0 (indirect)", "commit": "e7eda75" },
+        { "description": "github.com/plexusone/omni-mixpanel v0.1.0 (indirect)", "commit": "e7eda75" }
+      ]
+    },
+    {
       "version": "v0.1.0",
       "date": "2024-04-26",
       "commit": "d439b51",
