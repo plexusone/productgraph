@@ -291,6 +291,25 @@ ProductGraph uses OpenTelemetry-compatible field names:
 | `error.*` | Error details |
 | `performance.*` | Web vitals |
 
+## Analytics Forwarding
+
+When analytics integration is enabled, events are automatically forwarded to configured providers (Amplitude, Mixpanel) in addition to being stored in ProductGraph.
+
+```
+POST /v1/events
+      │
+      ├──▶ Storage (PostgreSQL)
+      │
+      └──▶ Analytics (if enabled)
+              │
+              ├──▶ Amplitude
+              └──▶ Mixpanel
+```
+
+This forwarding is transparent to the client. No changes are required to your event payloads.
+
+See the [Analytics Integration Guide](../integrations/analytics.md) for configuration details.
+
 ## Health Endpoints
 
 ### Health Check

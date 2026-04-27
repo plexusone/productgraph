@@ -8,45 +8,45 @@ The Starter architecture uses a single PostgreSQL database with Row-Level Securi
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                              Clients                                     │
-│   ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────────┐ │
-│   │ @coreforge/  │  │ @omniobserve │  │     Future: Swift/Kotlin     │ │
-│   │  telemetry   │  │     /core    │  │                              │ │
-│   └──────┬───────┘  └──────┬───────┘  └──────────────┬───────────────┘ │
-└──────────┼─────────────────┼────────────────────────┼──────────────────┘
-           │                 │                        │
-           └─────────────────┴───────────┬────────────┘
+│                              Clients                                    │
+│   ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────────┐  │
+│   │ @coreforge/  │  │ @omniobserve │  │     Future: Swift/Kotlin     │  │
+│   │  telemetry   │  │     /core    │  │                              │  │
+│   └──────┬───────┘  └──────┬───────┘  └──────────────┬───────────────┘  │
+└──────────┼─────────────────┼─────────────────────────┼──────────────────┘
+           │                 │                         │
+           └─────────────────┴───────────┬─────────────┘
                                          │ HTTPS
                                          ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                     ProductGraph Service (Single Binary)                 │
-│                                                                          │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────┐ │
-│  │ Event Ingestion │  │   GraphQL API   │  │   WebSocket (Future)    │ │
-│  │ POST /v1/events │  │                 │  │                         │ │
-│  └────────┬────────┘  └────────┬────────┘  └────────────┬────────────┘ │
-│           │                    │                        │              │
-│           └────────────────────┴────────────────────────┘              │
+│                     ProductGraph Service (Single Binary)                │
+│                                                                         │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────┐  │
+│  │ Event Ingestion │  │   GraphQL API   │  │   WebSocket (Future)    │  │
+│  │ POST /v1/events │  │                 │  │                         │  │
+│  └────────┬────────┘  └────────┬────────┘  └────────────┬────────────┘  │
+│           │                    │                        │               │
+│           └────────────────────┴────────────────────────┘               │
 │                                │                                        │
-│                    ┌───────────┴───────────┐                           │
-│                    │     Ent ORM Layer     │                           │
-│                    │  (Schema & Queries)   │                           │
-│                    └───────────┬───────────┘                           │
+│                    ┌───────────┴───────────┐                            │
+│                    │     Ent ORM Layer     │                            │
+│                    │  (Schema & Queries)   │                            │
+│                    └───────────┬───────────┘                            │
 └────────────────────────────────┼────────────────────────────────────────┘
                                  │
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    PostgreSQL 16+ (Single Instance)                      │
-│                                                                          │
-│  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │                   Row-Level Security (RLS)                       │   │
-│  │              Tenant isolation via org_id policies                │   │
-│  └─────────────────────────────────────────────────────────────────┘   │
-│                                                                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐ │
-│  │    Events    │  │   Sessions   │  │   Journeys   │  │  Projects  │ │
-│  │  (BRIN idx)  │  │              │  │              │  │            │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘  └────────────┘ │
+│                    PostgreSQL 16+ (Single Instance)                     │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                   Row-Level Security (RLS)                        │  │
+│  │              Tenant isolation via org_id policies                 │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐   │
+│  │    Events    │  │   Sessions   │  │   Journeys   │  │  Projects  │   │
+│  │  (BRIN idx)  │  │              │  │              │  │            │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └────────────┘   │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -181,6 +181,39 @@ func (Event) Indexes() []ent.Index {
 - **Row-Level Security**: Tenant isolation at database level
 - **Encryption**: TLS 1.3 in transit
 - **PII Redaction**: Configurable field scrubbing (planned)
+
+## Analytics Integration (v0.2.0)
+
+ProductGraph forwards events to external analytics providers via [omnidxi](https://github.com/plexusone/omnidxi):
+
+```
+Event Ingestion
+      │
+      ▼
+┌─────────────────────────────────────────────────────────┐
+│                    MultiPublisher                        │
+│                                                          │
+│   ┌─────────────────┐        ┌─────────────────────────┐│
+│   │ Memory Publisher│        │   Analytics Adapter     ││
+│   │   (PostgreSQL)  │        │      (omnidxi)          ││
+│   └─────────────────┘        └───────────┬─────────────┘│
+└──────────────────────────────────────────┼──────────────┘
+                                           │
+                              ┌────────────┴────────────┐
+                              ▼                         ▼
+                       ┌───────────┐             ┌───────────┐
+                       │ Amplitude │             │  Mixpanel │
+                       └───────────┘             └───────────┘
+```
+
+Key features:
+
+- **Backend-first**: Server-side forwarding bypasses ad blockers
+- **Multi-provider**: Send to Amplitude and Mixpanel simultaneously
+- **Zero frontend changes**: Existing SDK integration works as-is
+- **Unified schema**: OTel-compatible events translate automatically
+
+See the [Analytics Integration Guide](../integrations/analytics.md) for configuration details.
 
 ## Future Architecture
 

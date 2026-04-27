@@ -53,6 +53,8 @@ nav:
       - Scaling Guide: architecture/scaling.md
   - API Reference:
       - Event Ingestion: api/events.md
+  - Integrations:
+      - Analytics: integrations/analytics.md
   - Design:
       - Product Requirements: design/prd.md
       - Ideation: design/ideation.md
