@@ -16,12 +16,12 @@ The Starter architecture uses a single PostgreSQL database with Row-Level Securi
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              PRODUCTGRAPH PLATFORM                               │
-│                                                                                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
-│  │Design Canvas │  │  Analytics   │  │   Session    │  │     MCP Server       │ │
-│  │(React Flow)  │  │  Dashboard   │  │    Replay    │  │  (AI Agent Access)   │ │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘ │
+│                              PRODUCTGRAPH PLATFORM                              │
+│                                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────────────┐  │
+│  │Design Canvas │  │  Analytics   │  │   Session    │  │     MCP Server      │  │
+│  │(React Flow)  │  │  Dashboard   │  │    Replay    │  │  (AI Agent Access)  │  │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────────┬──────────┘  │
 │         │                 │                 │                     │             │
 │         └─────────────────┴─────────────────┴─────────────────────┘             │
 │                                      │                                          │

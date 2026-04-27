@@ -103,8 +103,8 @@ The PoC architecture uses a single PostgreSQL database with Row-Level Security (
 
 ```
 ┌─────────┐    ┌───────────────────┐    ┌────────────────────────────────────┐
-│   SDK   │───▶│  Ingestion API    │───▶│  PostgreSQL (Events + Sessions)   │
-│ (Client)│    │  POST /v1/events  │    │  Row-Level Security per org_id    │
+│   SDK   │───▶│  Ingestion API    │───▶│  PostgreSQL (Events + Sessions)    │
+│ (Client)│    │  POST /v1/events  │    │  Row-Level Security per org_id     │
 └─────────┘    └───────────────────┘    └────────────────────────────────────┘
 ```
 
