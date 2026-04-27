@@ -11,21 +11,21 @@ import (
 type EventType string
 
 const (
-	EventTypePageView     EventType = "page.view"
-	EventTypePageLeave    EventType = "page.leave"
-	EventTypeUIClick      EventType = "ui.click"
-	EventTypeUIInput      EventType = "ui.input"
-	EventTypeUIScroll     EventType = "ui.scroll"
-	EventTypeUIFocus      EventType = "ui.focus"
-	EventTypeUIBlur       EventType = "ui.blur"
-	EventTypeUISubmit     EventType = "ui.submit"
-	EventTypeStateChange  EventType = "state.change"
-	EventTypeAPIRequest   EventType = "api.request"
-	EventTypeAPIResponse  EventType = "api.response"
-	EventTypeJourneyStep  EventType = "journey.step"
-	EventTypeError        EventType = "error"
-	EventTypePerformance  EventType = "performance"
-	EventTypeCustom       EventType = "custom"
+	EventTypePageView    EventType = "page.view"
+	EventTypePageLeave   EventType = "page.leave"
+	EventTypeUIClick     EventType = "ui.click"
+	EventTypeUIInput     EventType = "ui.input"
+	EventTypeUIScroll    EventType = "ui.scroll"
+	EventTypeUIFocus     EventType = "ui.focus"
+	EventTypeUIBlur      EventType = "ui.blur"
+	EventTypeUISubmit    EventType = "ui.submit"
+	EventTypeStateChange EventType = "state.change"
+	EventTypeAPIRequest  EventType = "api.request"
+	EventTypeAPIResponse EventType = "api.response"
+	EventTypeJourneyStep EventType = "journey.step"
+	EventTypeError       EventType = "error"
+	EventTypePerformance EventType = "performance"
+	EventTypeCustom      EventType = "custom"
 )
 
 // Event represents a single telemetry event from the frontend.
@@ -45,19 +45,19 @@ type Event struct {
 	Sequence  int64     `json:"event.sequence"`
 
 	// Page context (page.* namespace)
-	PagePath    string `json:"page.path,omitempty"`
-	PageTitle   string `json:"page.title,omitempty"`
-	PageURL     string `json:"page.url,omitempty"`
+	PagePath     string `json:"page.path,omitempty"`
+	PageTitle    string `json:"page.title,omitempty"`
+	PageURL      string `json:"page.url,omitempty"`
 	PageReferrer string `json:"page.referrer,omitempty"`
 
 	// UI context (ui.* namespace)
-	UIComponentName string `json:"ui.component.name,omitempty"`
-	UIComponentPath string `json:"ui.component.path,omitempty"`
-	UIComponentType string `json:"ui.component.type,omitempty"`
-	UIAction        string `json:"ui.action,omitempty"`
-	UIElement       string `json:"ui.element,omitempty"`
-	UIElementText   string `json:"ui.element.text,omitempty"`
-	UIViewport      string `json:"ui.viewport,omitempty"`
+	UIComponentName  string  `json:"ui.component.name,omitempty"`
+	UIComponentPath  string  `json:"ui.component.path,omitempty"`
+	UIComponentType  string  `json:"ui.component.type,omitempty"`
+	UIAction         string  `json:"ui.action,omitempty"`
+	UIElement        string  `json:"ui.element,omitempty"`
+	UIElementText    string  `json:"ui.element.text,omitempty"`
+	UIViewport       string  `json:"ui.viewport,omitempty"`
 	UIScrollPosition float64 `json:"ui.scroll.position,omitempty"`
 
 	// State tracking (ui.state.* namespace)
@@ -67,10 +67,10 @@ type Event struct {
 	UIStateChangeType string `json:"ui.state.change_type,omitempty"`
 
 	// Journey context (gen_ai.journey.* namespace)
-	JourneyID         string `json:"gen_ai.journey.id,omitempty"`
-	JourneyStepID     string `json:"gen_ai.journey.step.id,omitempty"`
-	JourneyStepName   string `json:"gen_ai.journey.step.name,omitempty"`
-	ConversionStatus  string `json:"gen_ai.journey.conversion.status,omitempty"`
+	JourneyID        string `json:"gen_ai.journey.id,omitempty"`
+	JourneyStepID    string `json:"gen_ai.journey.step.id,omitempty"`
+	JourneyStepName  string `json:"gen_ai.journey.step.name,omitempty"`
+	ConversionStatus string `json:"gen_ai.journey.conversion.status,omitempty"`
 
 	// API tracking (api.* namespace)
 	APIMethod     string `json:"api.method,omitempty"`
@@ -138,9 +138,9 @@ func (e *ValidationError) Error() string {
 
 // IngestResponse is the response from the event ingestion endpoint.
 type IngestResponse struct {
-	Accepted int              `json:"accepted"`
-	Rejected int              `json:"rejected"`
-	Errors   []IngestError    `json:"errors,omitempty"`
+	Accepted int           `json:"accepted"`
+	Rejected int           `json:"rejected"`
+	Errors   []IngestError `json:"errors,omitempty"`
 }
 
 // IngestError describes an error for a specific event in the batch.

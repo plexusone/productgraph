@@ -19,12 +19,12 @@ func TestHandler_ServeHTTP(t *testing.T) {
 	handler := NewHandler(logger, publisher)
 
 	tests := []struct {
-		name           string
-		method         string
-		body           any
-		wantStatus     int
-		wantAccepted   int
-		wantRejected   int
+		name         string
+		method       string
+		body         any
+		wantStatus   int
+		wantAccepted int
+		wantRejected int
 	}{
 		{
 			name:   "valid single event",
