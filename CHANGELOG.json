@@ -1,0 +1,45 @@
+{
+  "irVersion": "1.0",
+  "project": "productgraph",
+  "repository": "https://github.com/plexusone/productgraph",
+  "versioning": "semver",
+  "commitConvention": "conventional",
+  "maintainers": ["plexusone", "johncwang@gmail.com"],
+  "releases": [
+    {
+      "version": "v0.1.0",
+      "date": "2024-04-26",
+      "commit": "d439b51",
+      "highlights": [
+        { "description": "Initial release of ProductGraph event ingestion service" },
+        { "description": "PostgreSQL-based Starter architecture with Row-Level Security for multi-tenancy" },
+        { "description": "OTel-compatible event schema with 40+ fields" }
+      ],
+      "added": [
+        { "description": "Event ingestion HTTP service (`POST /v1/events`) with batch support (max 1000 events)", "commit": "17c3b16" },
+        { "description": "Health (`GET /health`) and readiness (`GET /ready`) endpoints", "commit": "17c3b16" },
+        { "description": "CORS middleware for development", "commit": "17c3b16" },
+        { "description": "OTel-compatible event schema with 40+ fields across 8 namespaces", "commit": "ba46b7e" },
+        { "description": "Event types: page.view, page.leave, ui.click, ui.input, ui.scroll, ui.submit, state.change, api.request, api.response, journey.step, error, performance, custom", "commit": "ba46b7e" },
+        { "description": "Ent ORM schemas for Organization, Project, Event, Session, Journey", "commit": "3307638" },
+        { "description": "PostgreSQL Row-Level Security (RLS) for multi-tenancy via `org_id`", "commit": "3307638" },
+        { "description": "Database indexes optimized for time-series queries", "commit": "3307638" },
+        { "description": "Docker Compose development environment with PostgreSQL 16", "commit": "d477c8a" },
+        { "description": "Makefile with build, test, generate, and migrate commands", "commit": "3c42542" }
+      ],
+      "documentation": [
+        { "description": "Product Requirements Document (PRD)", "commit": "4ccb272" },
+        { "description": "Technical Requirements Document (TRD) with Starter and Scale architectures", "commit": "4ccb272" },
+        { "description": "Architecture Scaling Guide with cost analysis at $0-50K, $50K-500K, and $500K+ ARR levels", "commit": "4ccb272" },
+        { "description": "MkDocs documentation site with PlexusOne theme", "commit": "01664fc" },
+        { "description": "API reference for event ingestion endpoint", "commit": "01664fc" },
+        { "description": "Quick start and installation guides", "commit": "01664fc" }
+      ],
+      "dependencies": [
+        { "description": "Go 1.22+", "commit": "3c42542" },
+        { "description": "PostgreSQL 16+", "commit": "d477c8a" },
+        { "description": "Ent v0.14.6", "commit": "3307638" }
+      ]
+    }
+  ]
+}
