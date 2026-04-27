@@ -42,11 +42,11 @@ func main() {
 	mux.Handle("POST /v1/events", handler)
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"ok"}`))
+		_, _ = w.Write([]byte(`{"status":"ok"}`)) // Best-effort write; client may have disconnected
 	})
 	mux.HandleFunc("GET /ready", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"ready"}`))
+		_, _ = w.Write([]byte(`{"status":"ready"}`)) // Best-effort write; client may have disconnected
 	})
 
 	// Add CORS middleware for development
