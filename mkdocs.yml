@@ -1,52 +1,44 @@
 site_name: ProductGraph
 site_description: AI-native runtime product intelligence platform
-site_url: https://plexusone.github.io/productgraph/
+site_url: https://plexusone.github.io/productgraph
 repo_url: https://github.com/plexusone/productgraph
 repo_name: plexusone/productgraph
 
 theme:
   name: material
+  custom_dir: docs/overrides
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: indigo
-      accent: indigo
+    # Dark mode first (PlexusOne default)
+    - scheme: slate
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
   features:
-    - navigation.tabs
     - navigation.sections
     - navigation.expand
     - navigation.top
     - search.highlight
     - content.code.copy
-    - content.tabs.link
 
-plugins:
-  - search
+extra_css:
+  - https://plexusone.dev/css/plexusone-mkdocs.css
 
 markdown_extensions:
-  - admonition
-  - pymdownx.details
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed:
-      alternate_style: true
   - pymdownx.highlight:
       anchor_linenums: true
-  - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
   - tables
   - toc:
       permalink: true
@@ -64,11 +56,10 @@ nav:
   - Design:
       - Product Requirements: design/prd.md
       - Ideation: design/ideation.md
-  - Changelog: changelog.md
+  - Releases:
+      - Changelog: changelog.md
 
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/plexusone/productgraph
-
-copyright: Copyright &copy; 2024 Plexus One
