@@ -160,6 +160,80 @@
 
 ---
 
+## Phase 1.5: Analytics Integration (v0.2.0)
+
+### 1.5.1 OmniDXI Adapter
+
+- [x] Create analytics adapter
+  - Implements `events.Publisher` interface
+  - Maps ProductGraph events to omnidxi events
+  - Supports all event types and properties
+
+- [ ] Add adapter tests
+  - Unit tests for event mapping
+  - Mock tracker for isolation
+  - Test all event types
+  - Test context/properties extraction
+
+- [ ] Wire adapter to ingestion service
+  - Add to `cmd/ingestion/main.go`
+  - Create tracker from config
+  - Chain with existing publisher (fan-out)
+
+### 1.5.2 Analytics Configuration
+
+- [ ] Add config schema
+  ```yaml
+  analytics:
+    enabled: true
+    providers:
+      amplitude:
+        enabled: true
+        api_key: ${AMPLITUDE_API_KEY}
+      mixpanel:
+        enabled: true
+        token: ${MIXPANEL_TOKEN}
+  ```
+
+- [ ] Implement config loading
+  - Viper or env-based config
+  - Validate required fields when enabled
+  - Graceful degradation if provider unavailable
+
+- [ ] Add provider health checks
+  - Include in `/ready` endpoint
+  - Log provider status on startup
+
+### 1.5.3 Fan-out Publisher
+
+- [ ] Create multi-publisher
+  - Wraps multiple `events.Publisher` implementations
+  - Parallel dispatch to all publishers
+  - Aggregate errors without blocking
+
+- [ ] Integrate with event handler
+  - Memory publisher (existing)
+  - Analytics adapter (new)
+  - Future: Kafka publisher
+
+### 1.5.4 Documentation & Release
+
+- [ ] Update CHANGELOG for v0.2.0
+  - Add omnidxi integration feature
+  - Document new dependencies
+  - Note configuration options
+
+- [ ] Update README
+  - Add analytics section
+  - Configuration examples
+  - Provider setup instructions
+
+- [ ] Update API docs
+  - Document event flow to analytics
+  - Architecture diagram update
+
+---
+
 ## Phase 2: Session & Journey Processing
 
 ### 2.1 Session Builder Service
@@ -562,6 +636,7 @@
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
+| 2026-04-27 | Use omnidxi for analytics adapters | Unified interface for Amplitude/Mixpanel, backend-first integration, avoids ad blockers |
 | | Use ClickHouse over TimescaleDB | Better analytics query performance |
 | | Use gqlgen over graphql-go | Type-safe, better tooling |
 | | Use React Flow over custom canvas | Mature, well-documented |
