@@ -56,6 +56,8 @@ nav:
   - Design:
       - Product Requirements: design/prd.md
       - Ideation: design/ideation.md
+      - v0.2.0:
+          - Adapters & SDK: design/v0.2.0/IDEATION.md
   - Releases:
       - Changelog: changelog.md
       - v0.1.0: releases/v0.1.0.md
