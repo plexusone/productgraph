@@ -6,7 +6,7 @@ require (
 	entgo.io/ent v0.14.6
 	github.com/google/uuid v1.6.0
 	github.com/invopop/jsonschema v0.14.0
-	github.com/plexusone/omnidxi v0.1.0
+	github.com/plexusone/omnidxi v0.1.1
 	github.com/spf13/cobra v1.10.2
 )
 
@@ -27,7 +27,7 @@ require (
 	github.com/mixpanel/mixpanel-go/v2 v2.0.0 // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/plexusone/omni-amplitude v0.1.0 // indirect
-	github.com/plexusone/omni-mixpanel v0.1.0 // indirect
+	github.com/plexusone/omni-mixpanel v0.1.1 // indirect
 	github.com/plexusone/omnidxi-core v0.1.0 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
