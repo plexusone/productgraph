@@ -81,7 +81,7 @@ func TestAdapter_Publish(t *testing.T) {
 	events := []schema.Event{
 		{
 			EventID:   "evt-1",
-			ProjectID: "proj-1",
+			ProductID: "proj-1",
 			SessionID: "sess-1",
 			UserID:    "user-1",
 			EventType: schema.EventTypePageView,
@@ -93,7 +93,7 @@ func TestAdapter_Publish(t *testing.T) {
 		},
 		{
 			EventID:         "evt-2",
-			ProjectID:       "proj-1",
+			ProductID:       "proj-1",
 			SessionID:       "sess-1",
 			UserID:          "user-1",
 			EventType:       schema.EventTypeUIClick,
@@ -205,7 +205,7 @@ func TestMapEventType(t *testing.T) {
 
 func TestBuildProperties(t *testing.T) {
 	event := schema.Event{
-		ProjectID:       "proj-1",
+		ProductID:       "proj-1",
 		OrgID:           "org-1",
 		Sequence:        42,
 		UIComponentName: "Header",
@@ -228,8 +228,8 @@ func TestBuildProperties(t *testing.T) {
 	props := buildProperties(event)
 
 	// Check standard properties
-	if props["project_id"] != "proj-1" {
-		t.Errorf("expected project_id proj-1, got %v", props["project_id"])
+	if props["product_id"] != "proj-1" {
+		t.Errorf("expected product_id proj-1, got %v", props["product_id"])
 	}
 	if props["org_id"] != "org-1" {
 		t.Errorf("expected org_id org-1, got %v", props["org_id"])
@@ -305,7 +305,7 @@ func TestBuildContext(t *testing.T) {
 	t.Run("without context fields", func(t *testing.T) {
 		event := schema.Event{
 			EventID:   "evt-1",
-			ProjectID: "proj-1",
+			ProductID: "proj-1",
 			SessionID: "sess-1",
 			EventType: schema.EventTypeUIClick,
 		}

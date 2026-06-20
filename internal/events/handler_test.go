@@ -33,7 +33,7 @@ func TestHandler_ServeHTTP(t *testing.T) {
 				Events: []schema.Event{
 					{
 						EventID:   "evt_001",
-						ProjectID: "proj_test",
+						ProductID: "proj_test",
 						SessionID: "sess_001",
 						EventType: schema.EventTypePageView,
 						Timestamp: time.Now(),
@@ -52,14 +52,14 @@ func TestHandler_ServeHTTP(t *testing.T) {
 				Events: []schema.Event{
 					{
 						EventID:   "evt_002",
-						ProjectID: "proj_test",
+						ProductID: "proj_test",
 						SessionID: "sess_001",
 						EventType: schema.EventTypePageView,
 						Timestamp: time.Now(),
 					},
 					{
 						EventID:   "evt_003",
-						ProjectID: "proj_test",
+						ProductID: "proj_test",
 						SessionID: "sess_001",
 						EventType: schema.EventTypeUIClick,
 						Timestamp: time.Now(),
@@ -77,7 +77,7 @@ func TestHandler_ServeHTTP(t *testing.T) {
 				Events: []schema.Event{
 					{
 						EventID:   "evt_004",
-						ProjectID: "proj_test",
+						ProductID: "proj_test",
 						SessionID: "sess_001",
 						EventType: schema.EventTypePageView,
 						Timestamp: time.Now(),
@@ -171,7 +171,7 @@ func TestHandler_BatchSizeLimit(t *testing.T) {
 	for i := range events {
 		events[i] = schema.Event{
 			EventID:   "evt_" + string(rune(i)),
-			ProjectID: "proj_test",
+			ProductID: "proj_test",
 			SessionID: "sess_001",
 			EventType: schema.EventTypePageView,
 			Timestamp: time.Now(),

@@ -90,9 +90,9 @@ func mapEventType(t schema.EventType) omnidxi.EventType {
 func buildProperties(e schema.Event) map[string]any {
 	props := make(map[string]any)
 
-	// Project/org context
-	if e.ProjectID != "" {
-		props["project_id"] = e.ProjectID
+	// Product/org context
+	if e.ProductID != "" {
+		props["product_id"] = e.ProductID
 	}
 	if e.OrgID != "" {
 		props["org_id"] = e.OrgID
