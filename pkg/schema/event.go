@@ -33,7 +33,7 @@ const (
 type Event struct {
 	// Identity
 	EventID   string `json:"event_id"`
-	ProjectID string `json:"project_id"`
+	ProductID string `json:"product_id"`
 	SessionID string `json:"session.id"`
 	UserID    string `json:"user.id,omitempty"`
 	OrgID     string `json:"org.id,omitempty"`
@@ -111,8 +111,8 @@ func (e *Event) Validate() error {
 	if e.EventID == "" {
 		return &ValidationError{Field: "event_id", Message: "required"}
 	}
-	if e.ProjectID == "" {
-		return &ValidationError{Field: "project_id", Message: "required"}
+	if e.ProductID == "" {
+		return &ValidationError{Field: "product_id", Message: "required"}
 	}
 	if e.SessionID == "" {
 		return &ValidationError{Field: "session.id", Message: "required"}

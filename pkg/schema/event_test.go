@@ -17,7 +17,7 @@ func TestEventValidate(t *testing.T) {
 			name: "valid event",
 			event: Event{
 				EventID:   "evt_123",
-				ProjectID: "proj_abc",
+				ProductID: "proj_abc",
 				SessionID: "sess_xyz",
 				EventType: EventTypePageView,
 				Timestamp: time.Now(),
@@ -27,7 +27,7 @@ func TestEventValidate(t *testing.T) {
 		{
 			name: "missing event_id",
 			event: Event{
-				ProjectID: "proj_abc",
+				ProductID: "proj_abc",
 				SessionID: "sess_xyz",
 				EventType: EventTypePageView,
 				Timestamp: time.Now(),
@@ -36,7 +36,7 @@ func TestEventValidate(t *testing.T) {
 			errMsg:  "event_id: required",
 		},
 		{
-			name: "missing project_id",
+			name: "missing product_id",
 			event: Event{
 				EventID:   "evt_123",
 				SessionID: "sess_xyz",
@@ -44,13 +44,13 @@ func TestEventValidate(t *testing.T) {
 				Timestamp: time.Now(),
 			},
 			wantErr: true,
-			errMsg:  "project_id: required",
+			errMsg:  "product_id: required",
 		},
 		{
 			name: "missing session_id",
 			event: Event{
 				EventID:   "evt_123",
-				ProjectID: "proj_abc",
+				ProductID: "proj_abc",
 				EventType: EventTypePageView,
 				Timestamp: time.Now(),
 			},
@@ -61,7 +61,7 @@ func TestEventValidate(t *testing.T) {
 			name: "missing event_type",
 			event: Event{
 				EventID:   "evt_123",
-				ProjectID: "proj_abc",
+				ProductID: "proj_abc",
 				SessionID: "sess_xyz",
 				Timestamp: time.Now(),
 			},
@@ -72,7 +72,7 @@ func TestEventValidate(t *testing.T) {
 			name: "missing timestamp",
 			event: Event{
 				EventID:   "evt_123",
-				ProjectID: "proj_abc",
+				ProductID: "proj_abc",
 				SessionID: "sess_xyz",
 				EventType: EventTypePageView,
 			},
@@ -106,7 +106,7 @@ func TestEventJSON(t *testing.T) {
 
 	event := Event{
 		EventID:         "evt_123",
-		ProjectID:       "proj_abc",
+		ProductID:       "proj_abc",
 		SessionID:       "sess_xyz",
 		UserID:          "user_456",
 		EventType:       EventTypeUIClick,
@@ -165,14 +165,14 @@ func TestEventBatch(t *testing.T) {
 		Events: []Event{
 			{
 				EventID:   "evt_1",
-				ProjectID: "proj_abc",
+				ProductID: "proj_abc",
 				SessionID: "sess_xyz",
 				EventType: EventTypePageView,
 				Timestamp: time.Now(),
 			},
 			{
 				EventID:   "evt_2",
-				ProjectID: "proj_abc",
+				ProductID: "proj_abc",
 				SessionID: "sess_xyz",
 				EventType: EventTypeUIClick,
 				Timestamp: time.Now(),
