@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,60 +13,60 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/plexusone/productgraph/ent/capability"
+	"github.com/plexusone/productgraph/ent/feature"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/product"
-	"github.com/plexusone/productgraph/ent/session"
 )
 
-// SessionQuery is the builder for querying Session entities.
-type SessionQuery struct {
+// FeatureQuery is the builder for querying Feature entities.
+type FeatureQuery struct {
 	config
-	ctx         *QueryContext
-	order       []session.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.Session
-	withProduct *ProductQuery
-	withJourney *JourneyQuery
+	ctx            *QueryContext
+	order          []feature.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.Feature
+	withCapability *CapabilityQuery
+	withJourneys   *JourneyQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the SessionQuery builder.
-func (_q *SessionQuery) Where(ps ...predicate.Session) *SessionQuery {
+// Where adds a new predicate for the FeatureQuery builder.
+func (_q *FeatureQuery) Where(ps ...predicate.Feature) *FeatureQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *SessionQuery) Limit(limit int) *SessionQuery {
+func (_q *FeatureQuery) Limit(limit int) *FeatureQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *SessionQuery) Offset(offset int) *SessionQuery {
+func (_q *FeatureQuery) Offset(offset int) *FeatureQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *SessionQuery) Unique(unique bool) *SessionQuery {
+func (_q *FeatureQuery) Unique(unique bool) *FeatureQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *SessionQuery) Order(o ...session.OrderOption) *SessionQuery {
+func (_q *FeatureQuery) Order(o ...feature.OrderOption) *FeatureQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryProduct chains the current query on the "product" edge.
-func (_q *SessionQuery) QueryProduct() *ProductQuery {
-	query := (&ProductClient{config: _q.config}).Query()
+// QueryCapability chains the current query on the "capability" edge.
+func (_q *FeatureQuery) QueryCapability() *CapabilityQuery {
+	query := (&CapabilityClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -75,9 +76,9 @@ func (_q *SessionQuery) QueryProduct() *ProductQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, selector),
-			sqlgraph.To(product.Table, product.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, session.ProductTable, session.ProductColumn),
+			sqlgraph.From(feature.Table, feature.FieldID, selector),
+			sqlgraph.To(capability.Table, capability.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, feature.CapabilityTable, feature.CapabilityColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -85,8 +86,8 @@ func (_q *SessionQuery) QueryProduct() *ProductQuery {
 	return query
 }
 
-// QueryJourney chains the current query on the "journey" edge.
-func (_q *SessionQuery) QueryJourney() *JourneyQuery {
+// QueryJourneys chains the current query on the "journeys" edge.
+func (_q *FeatureQuery) QueryJourneys() *JourneyQuery {
 	query := (&JourneyClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -97,9 +98,9 @@ func (_q *SessionQuery) QueryJourney() *JourneyQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, selector),
+			sqlgraph.From(feature.Table, feature.FieldID, selector),
 			sqlgraph.To(journey.Table, journey.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, session.JourneyTable, session.JourneyColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, feature.JourneysTable, feature.JourneysColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -107,21 +108,21 @@ func (_q *SessionQuery) QueryJourney() *JourneyQuery {
 	return query
 }
 
-// First returns the first Session entity from the query.
-// Returns a *NotFoundError when no Session was found.
-func (_q *SessionQuery) First(ctx context.Context) (*Session, error) {
+// First returns the first Feature entity from the query.
+// Returns a *NotFoundError when no Feature was found.
+func (_q *FeatureQuery) First(ctx context.Context) (*Feature, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{session.Label}
+		return nil, &NotFoundError{feature.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *SessionQuery) FirstX(ctx context.Context) *Session {
+func (_q *FeatureQuery) FirstX(ctx context.Context) *Feature {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -129,22 +130,22 @@ func (_q *SessionQuery) FirstX(ctx context.Context) *Session {
 	return node
 }
 
-// FirstID returns the first Session ID from the query.
-// Returns a *NotFoundError when no Session ID was found.
-func (_q *SessionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+// FirstID returns the first Feature ID from the query.
+// Returns a *NotFoundError when no Feature ID was found.
+func (_q *FeatureQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{session.Label}
+		err = &NotFoundError{feature.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *SessionQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (_q *FeatureQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -152,10 +153,10 @@ func (_q *SessionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// Only returns a single Session entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Session entity is found.
-// Returns a *NotFoundError when no Session entities are found.
-func (_q *SessionQuery) Only(ctx context.Context) (*Session, error) {
+// Only returns a single Feature entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Feature entity is found.
+// Returns a *NotFoundError when no Feature entities are found.
+func (_q *FeatureQuery) Only(ctx context.Context) (*Feature, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -164,14 +165,14 @@ func (_q *SessionQuery) Only(ctx context.Context) (*Session, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{session.Label}
+		return nil, &NotFoundError{feature.Label}
 	default:
-		return nil, &NotSingularError{session.Label}
+		return nil, &NotSingularError{feature.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *SessionQuery) OnlyX(ctx context.Context) *Session {
+func (_q *FeatureQuery) OnlyX(ctx context.Context) *Feature {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -179,10 +180,10 @@ func (_q *SessionQuery) OnlyX(ctx context.Context) *Session {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Session ID in the query.
-// Returns a *NotSingularError when more than one Session ID is found.
+// OnlyID is like Only, but returns the only Feature ID in the query.
+// Returns a *NotSingularError when more than one Feature ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *SessionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *FeatureQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -191,15 +192,15 @@ func (_q *SessionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{session.Label}
+		err = &NotFoundError{feature.Label}
 	default:
-		err = &NotSingularError{session.Label}
+		err = &NotSingularError{feature.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *SessionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (_q *FeatureQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -207,18 +208,18 @@ func (_q *SessionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// All executes the query and returns a list of Sessions.
-func (_q *SessionQuery) All(ctx context.Context) ([]*Session, error) {
+// All executes the query and returns a list of Features.
+func (_q *FeatureQuery) All(ctx context.Context) ([]*Feature, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Session, *SessionQuery]()
-	return withInterceptors[[]*Session](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Feature, *FeatureQuery]()
+	return withInterceptors[[]*Feature](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *SessionQuery) AllX(ctx context.Context) []*Session {
+func (_q *FeatureQuery) AllX(ctx context.Context) []*Feature {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -226,20 +227,20 @@ func (_q *SessionQuery) AllX(ctx context.Context) []*Session {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Session IDs.
-func (_q *SessionQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+// IDs executes the query and returns a list of Feature IDs.
+func (_q *FeatureQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(session.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(feature.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *SessionQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (_q *FeatureQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -248,16 +249,16 @@ func (_q *SessionQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (_q *SessionQuery) Count(ctx context.Context) (int, error) {
+func (_q *FeatureQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*SessionQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*FeatureQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *SessionQuery) CountX(ctx context.Context) int {
+func (_q *FeatureQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -266,7 +267,7 @@ func (_q *SessionQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *SessionQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *FeatureQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -279,7 +280,7 @@ func (_q *SessionQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *SessionQuery) ExistX(ctx context.Context) bool {
+func (_q *FeatureQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -287,45 +288,45 @@ func (_q *SessionQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the SessionQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the FeatureQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *SessionQuery) Clone() *SessionQuery {
+func (_q *FeatureQuery) Clone() *FeatureQuery {
 	if _q == nil {
 		return nil
 	}
-	return &SessionQuery{
-		config:      _q.config,
-		ctx:         _q.ctx.Clone(),
-		order:       append([]session.OrderOption{}, _q.order...),
-		inters:      append([]Interceptor{}, _q.inters...),
-		predicates:  append([]predicate.Session{}, _q.predicates...),
-		withProduct: _q.withProduct.Clone(),
-		withJourney: _q.withJourney.Clone(),
+	return &FeatureQuery{
+		config:         _q.config,
+		ctx:            _q.ctx.Clone(),
+		order:          append([]feature.OrderOption{}, _q.order...),
+		inters:         append([]Interceptor{}, _q.inters...),
+		predicates:     append([]predicate.Feature{}, _q.predicates...),
+		withCapability: _q.withCapability.Clone(),
+		withJourneys:   _q.withJourneys.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithProduct tells the query-builder to eager-load the nodes that are connected to
-// the "product" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *SessionQuery) WithProduct(opts ...func(*ProductQuery)) *SessionQuery {
-	query := (&ProductClient{config: _q.config}).Query()
+// WithCapability tells the query-builder to eager-load the nodes that are connected to
+// the "capability" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *FeatureQuery) WithCapability(opts ...func(*CapabilityQuery)) *FeatureQuery {
+	query := (&CapabilityClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withProduct = query
+	_q.withCapability = query
 	return _q
 }
 
-// WithJourney tells the query-builder to eager-load the nodes that are connected to
-// the "journey" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *SessionQuery) WithJourney(opts ...func(*JourneyQuery)) *SessionQuery {
+// WithJourneys tells the query-builder to eager-load the nodes that are connected to
+// the "journeys" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *FeatureQuery) WithJourneys(opts ...func(*JourneyQuery)) *FeatureQuery {
 	query := (&JourneyClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withJourney = query
+	_q.withJourneys = query
 	return _q
 }
 
@@ -339,15 +340,15 @@ func (_q *SessionQuery) WithJourney(opts ...func(*JourneyQuery)) *SessionQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Session.Query().
-//		GroupBy(session.FieldOrgID).
+//	client.Feature.Query().
+//		GroupBy(feature.FieldOrgID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *SessionQuery) GroupBy(field string, fields ...string) *SessionGroupBy {
+func (_q *FeatureQuery) GroupBy(field string, fields ...string) *FeatureGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &SessionGroupBy{build: _q}
+	grbuild := &FeatureGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = session.Label
+	grbuild.label = feature.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -361,23 +362,23 @@ func (_q *SessionQuery) GroupBy(field string, fields ...string) *SessionGroupBy 
 //		OrgID uuid.UUID `json:"org_id,omitempty"`
 //	}
 //
-//	client.Session.Query().
-//		Select(session.FieldOrgID).
+//	client.Feature.Query().
+//		Select(feature.FieldOrgID).
 //		Scan(ctx, &v)
-func (_q *SessionQuery) Select(fields ...string) *SessionSelect {
+func (_q *FeatureQuery) Select(fields ...string) *FeatureSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &SessionSelect{SessionQuery: _q}
-	sbuild.label = session.Label
+	sbuild := &FeatureSelect{FeatureQuery: _q}
+	sbuild.label = feature.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a SessionSelect configured with the given aggregations.
-func (_q *SessionQuery) Aggregate(fns ...AggregateFunc) *SessionSelect {
+// Aggregate returns a FeatureSelect configured with the given aggregations.
+func (_q *FeatureQuery) Aggregate(fns ...AggregateFunc) *FeatureSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *SessionQuery) prepareQuery(ctx context.Context) error {
+func (_q *FeatureQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -389,7 +390,7 @@ func (_q *SessionQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !session.ValidColumn(f) {
+		if !feature.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -403,20 +404,20 @@ func (_q *SessionQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Session, error) {
+func (_q *FeatureQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Feature, error) {
 	var (
-		nodes       = []*Session{}
+		nodes       = []*Feature{}
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			_q.withProduct != nil,
-			_q.withJourney != nil,
+			_q.withCapability != nil,
+			_q.withJourneys != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Session).scanValues(nil, columns)
+		return (*Feature).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Session{config: _q.config}
+		node := &Feature{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -430,26 +431,27 @@ func (_q *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withProduct; query != nil {
-		if err := _q.loadProduct(ctx, query, nodes, nil,
-			func(n *Session, e *Product) { n.Edges.Product = e }); err != nil {
+	if query := _q.withCapability; query != nil {
+		if err := _q.loadCapability(ctx, query, nodes, nil,
+			func(n *Feature, e *Capability) { n.Edges.Capability = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := _q.withJourney; query != nil {
-		if err := _q.loadJourney(ctx, query, nodes, nil,
-			func(n *Session, e *Journey) { n.Edges.Journey = e }); err != nil {
+	if query := _q.withJourneys; query != nil {
+		if err := _q.loadJourneys(ctx, query, nodes,
+			func(n *Feature) { n.Edges.Journeys = []*Journey{} },
+			func(n *Feature, e *Journey) { n.Edges.Journeys = append(n.Edges.Journeys, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *SessionQuery) loadProduct(ctx context.Context, query *ProductQuery, nodes []*Session, init func(*Session), assign func(*Session, *Product)) error {
+func (_q *FeatureQuery) loadCapability(ctx context.Context, query *CapabilityQuery, nodes []*Feature, init func(*Feature), assign func(*Feature, *Capability)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Session)
+	nodeids := make(map[uuid.UUID][]*Feature)
 	for i := range nodes {
-		fk := nodes[i].ProductID
+		fk := nodes[i].CapabilityID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -458,7 +460,7 @@ func (_q *SessionQuery) loadProduct(ctx context.Context, query *ProductQuery, no
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(product.IDIn(ids...))
+	query.Where(capability.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -466,7 +468,7 @@ func (_q *SessionQuery) loadProduct(ctx context.Context, query *ProductQuery, no
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "product_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "capability_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -474,40 +476,41 @@ func (_q *SessionQuery) loadProduct(ctx context.Context, query *ProductQuery, no
 	}
 	return nil
 }
-func (_q *SessionQuery) loadJourney(ctx context.Context, query *JourneyQuery, nodes []*Session, init func(*Session), assign func(*Session, *Journey)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Session)
+func (_q *FeatureQuery) loadJourneys(ctx context.Context, query *JourneyQuery, nodes []*Feature, init func(*Feature), assign func(*Feature, *Journey)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Feature)
 	for i := range nodes {
-		if nodes[i].JourneyID == nil {
-			continue
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
-		fk := *nodes[i].JourneyID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(ids) == 0 {
-		return nil
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(journey.FieldFeatureID)
 	}
-	query.Where(journey.IDIn(ids...))
+	query.Where(predicate.Journey(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(feature.JourneysColumn), fks...))
+	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		fk := n.FeatureID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "feature_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "journey_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "feature_id" returned %v for node %v`, *fk, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
+		assign(node, n)
 	}
 	return nil
 }
 
-func (_q *SessionQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *FeatureQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -516,8 +519,8 @@ func (_q *SessionQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *SessionQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
+func (_q *FeatureQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(feature.Table, feature.Columns, sqlgraph.NewFieldSpec(feature.FieldID, field.TypeUUID))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -526,17 +529,14 @@ func (_q *SessionQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, session.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, feature.FieldID)
 		for i := range fields {
-			if fields[i] != session.FieldID {
+			if fields[i] != feature.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if _q.withProduct != nil {
-			_spec.Node.AddColumnOnce(session.FieldProductID)
-		}
-		if _q.withJourney != nil {
-			_spec.Node.AddColumnOnce(session.FieldJourneyID)
+		if _q.withCapability != nil {
+			_spec.Node.AddColumnOnce(feature.FieldCapabilityID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -562,12 +562,12 @@ func (_q *SessionQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *SessionQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *FeatureQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(session.Table)
+	t1 := builder.Table(feature.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = session.Columns
+		columns = feature.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -594,28 +594,28 @@ func (_q *SessionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// SessionGroupBy is the group-by builder for Session entities.
-type SessionGroupBy struct {
+// FeatureGroupBy is the group-by builder for Feature entities.
+type FeatureGroupBy struct {
 	selector
-	build *SessionQuery
+	build *FeatureQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *SessionGroupBy) Aggregate(fns ...AggregateFunc) *SessionGroupBy {
+func (_g *FeatureGroupBy) Aggregate(fns ...AggregateFunc) *FeatureGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *SessionGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *FeatureGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SessionQuery, *SessionGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*FeatureQuery, *FeatureGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *SessionGroupBy) sqlScan(ctx context.Context, root *SessionQuery, v any) error {
+func (_g *FeatureGroupBy) sqlScan(ctx context.Context, root *FeatureQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -642,28 +642,28 @@ func (_g *SessionGroupBy) sqlScan(ctx context.Context, root *SessionQuery, v any
 	return sql.ScanSlice(rows, v)
 }
 
-// SessionSelect is the builder for selecting fields of Session entities.
-type SessionSelect struct {
-	*SessionQuery
+// FeatureSelect is the builder for selecting fields of Feature entities.
+type FeatureSelect struct {
+	*FeatureQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *SessionSelect) Aggregate(fns ...AggregateFunc) *SessionSelect {
+func (_s *FeatureSelect) Aggregate(fns ...AggregateFunc) *FeatureSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *SessionSelect) Scan(ctx context.Context, v any) error {
+func (_s *FeatureSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SessionQuery, *SessionSelect](ctx, _s.SessionQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*FeatureQuery, *FeatureSelect](ctx, _s.FeatureQuery, _s, _s.inters, v)
 }
 
-func (_s *SessionSelect) sqlScan(ctx context.Context, root *SessionQuery, v any) error {
+func (_s *FeatureSelect) sqlScan(ctx context.Context, root *FeatureQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

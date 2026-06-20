@@ -11,58 +11,59 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/plexusone/productgraph/ent/capability"
 	"github.com/plexusone/productgraph/ent/event"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/organization"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
-// ProjectCreate is the builder for creating a Project entity.
-type ProjectCreate struct {
+// ProductCreate is the builder for creating a Product entity.
+type ProductCreate struct {
 	config
-	mutation *ProjectMutation
+	mutation *ProductMutation
 	hooks    []Hook
 }
 
 // SetOrgID sets the "org_id" field.
-func (_c *ProjectCreate) SetOrgID(v uuid.UUID) *ProjectCreate {
+func (_c *ProductCreate) SetOrgID(v uuid.UUID) *ProductCreate {
 	_c.mutation.SetOrgID(v)
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *ProjectCreate) SetName(v string) *ProjectCreate {
+func (_c *ProductCreate) SetName(v string) *ProductCreate {
 	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetSlug sets the "slug" field.
-func (_c *ProjectCreate) SetSlug(v string) *ProjectCreate {
+func (_c *ProductCreate) SetSlug(v string) *ProductCreate {
 	_c.mutation.SetSlug(v)
 	return _c
 }
 
 // SetAPIKey sets the "api_key" field.
-func (_c *ProjectCreate) SetAPIKey(v string) *ProjectCreate {
+func (_c *ProductCreate) SetAPIKey(v string) *ProductCreate {
 	_c.mutation.SetAPIKey(v)
 	return _c
 }
 
 // SetSettings sets the "settings" field.
-func (_c *ProjectCreate) SetSettings(v map[string]interface{}) *ProjectCreate {
+func (_c *ProductCreate) SetSettings(v map[string]interface{}) *ProductCreate {
 	_c.mutation.SetSettings(v)
 	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *ProjectCreate) SetCreatedAt(v time.Time) *ProjectCreate {
+func (_c *ProductCreate) SetCreatedAt(v time.Time) *ProductCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *ProjectCreate) SetNillableCreatedAt(v *time.Time) *ProjectCreate {
+func (_c *ProductCreate) SetNillableCreatedAt(v *time.Time) *ProductCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -70,13 +71,13 @@ func (_c *ProjectCreate) SetNillableCreatedAt(v *time.Time) *ProjectCreate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *ProjectCreate) SetUpdatedAt(v time.Time) *ProjectCreate {
+func (_c *ProductCreate) SetUpdatedAt(v time.Time) *ProductCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *ProjectCreate) SetNillableUpdatedAt(v *time.Time) *ProjectCreate {
+func (_c *ProductCreate) SetNillableUpdatedAt(v *time.Time) *ProductCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -84,13 +85,13 @@ func (_c *ProjectCreate) SetNillableUpdatedAt(v *time.Time) *ProjectCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *ProjectCreate) SetID(v uuid.UUID) *ProjectCreate {
+func (_c *ProductCreate) SetID(v uuid.UUID) *ProductCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *ProjectCreate) SetNillableID(v *uuid.UUID) *ProjectCreate {
+func (_c *ProductCreate) SetNillableID(v *uuid.UUID) *ProductCreate {
 	if v != nil {
 		_c.SetID(*v)
 	}
@@ -98,24 +99,39 @@ func (_c *ProjectCreate) SetNillableID(v *uuid.UUID) *ProjectCreate {
 }
 
 // SetOrganizationID sets the "organization" edge to the Organization entity by ID.
-func (_c *ProjectCreate) SetOrganizationID(id uuid.UUID) *ProjectCreate {
+func (_c *ProductCreate) SetOrganizationID(id uuid.UUID) *ProductCreate {
 	_c.mutation.SetOrganizationID(id)
 	return _c
 }
 
 // SetOrganization sets the "organization" edge to the Organization entity.
-func (_c *ProjectCreate) SetOrganization(v *Organization) *ProjectCreate {
+func (_c *ProductCreate) SetOrganization(v *Organization) *ProductCreate {
 	return _c.SetOrganizationID(v.ID)
 }
 
+// AddCapabilityIDs adds the "capabilities" edge to the Capability entity by IDs.
+func (_c *ProductCreate) AddCapabilityIDs(ids ...uuid.UUID) *ProductCreate {
+	_c.mutation.AddCapabilityIDs(ids...)
+	return _c
+}
+
+// AddCapabilities adds the "capabilities" edges to the Capability entity.
+func (_c *ProductCreate) AddCapabilities(v ...*Capability) *ProductCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCapabilityIDs(ids...)
+}
+
 // AddEventIDs adds the "events" edge to the Event entity by IDs.
-func (_c *ProjectCreate) AddEventIDs(ids ...uuid.UUID) *ProjectCreate {
+func (_c *ProductCreate) AddEventIDs(ids ...uuid.UUID) *ProductCreate {
 	_c.mutation.AddEventIDs(ids...)
 	return _c
 }
 
 // AddEvents adds the "events" edges to the Event entity.
-func (_c *ProjectCreate) AddEvents(v ...*Event) *ProjectCreate {
+func (_c *ProductCreate) AddEvents(v ...*Event) *ProductCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -124,13 +140,13 @@ func (_c *ProjectCreate) AddEvents(v ...*Event) *ProjectCreate {
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (_c *ProjectCreate) AddSessionIDs(ids ...uuid.UUID) *ProjectCreate {
+func (_c *ProductCreate) AddSessionIDs(ids ...uuid.UUID) *ProductCreate {
 	_c.mutation.AddSessionIDs(ids...)
 	return _c
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (_c *ProjectCreate) AddSessions(v ...*Session) *ProjectCreate {
+func (_c *ProductCreate) AddSessions(v ...*Session) *ProductCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -139,13 +155,13 @@ func (_c *ProjectCreate) AddSessions(v ...*Session) *ProjectCreate {
 }
 
 // AddJourneyIDs adds the "journeys" edge to the Journey entity by IDs.
-func (_c *ProjectCreate) AddJourneyIDs(ids ...uuid.UUID) *ProjectCreate {
+func (_c *ProductCreate) AddJourneyIDs(ids ...uuid.UUID) *ProductCreate {
 	_c.mutation.AddJourneyIDs(ids...)
 	return _c
 }
 
 // AddJourneys adds the "journeys" edges to the Journey entity.
-func (_c *ProjectCreate) AddJourneys(v ...*Journey) *ProjectCreate {
+func (_c *ProductCreate) AddJourneys(v ...*Journey) *ProductCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -153,19 +169,19 @@ func (_c *ProjectCreate) AddJourneys(v ...*Journey) *ProjectCreate {
 	return _c.AddJourneyIDs(ids...)
 }
 
-// Mutation returns the ProjectMutation object of the builder.
-func (_c *ProjectCreate) Mutation() *ProjectMutation {
+// Mutation returns the ProductMutation object of the builder.
+func (_c *ProductCreate) Mutation() *ProductMutation {
 	return _c.mutation
 }
 
-// Save creates the Project in the database.
-func (_c *ProjectCreate) Save(ctx context.Context) (*Project, error) {
+// Save creates the Product in the database.
+func (_c *ProductCreate) Save(ctx context.Context) (*Product, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *ProjectCreate) SaveX(ctx context.Context) *Project {
+func (_c *ProductCreate) SaveX(ctx context.Context) *Product {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -174,76 +190,76 @@ func (_c *ProjectCreate) SaveX(ctx context.Context) *Project {
 }
 
 // Exec executes the query.
-func (_c *ProjectCreate) Exec(ctx context.Context) error {
+func (_c *ProductCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *ProjectCreate) ExecX(ctx context.Context) {
+func (_c *ProductCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *ProjectCreate) defaults() {
+func (_c *ProductCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := project.DefaultCreatedAt()
+		v := product.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := project.DefaultUpdatedAt()
+		v := product.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
-		v := project.DefaultID()
+		v := product.DefaultID()
 		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *ProjectCreate) check() error {
+func (_c *ProductCreate) check() error {
 	if _, ok := _c.mutation.OrgID(); !ok {
-		return &ValidationError{Name: "org_id", err: errors.New(`ent: missing required field "Project.org_id"`)}
+		return &ValidationError{Name: "org_id", err: errors.New(`ent: missing required field "Product.org_id"`)}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Project.name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Product.name"`)}
 	}
 	if v, ok := _c.mutation.Name(); ok {
-		if err := project.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Project.name": %w`, err)}
+		if err := product.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Product.name": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Slug(); !ok {
-		return &ValidationError{Name: "slug", err: errors.New(`ent: missing required field "Project.slug"`)}
+		return &ValidationError{Name: "slug", err: errors.New(`ent: missing required field "Product.slug"`)}
 	}
 	if v, ok := _c.mutation.Slug(); ok {
-		if err := project.SlugValidator(v); err != nil {
-			return &ValidationError{Name: "slug", err: fmt.Errorf(`ent: validator failed for field "Project.slug": %w`, err)}
+		if err := product.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`ent: validator failed for field "Product.slug": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.APIKey(); !ok {
-		return &ValidationError{Name: "api_key", err: errors.New(`ent: missing required field "Project.api_key"`)}
+		return &ValidationError{Name: "api_key", err: errors.New(`ent: missing required field "Product.api_key"`)}
 	}
 	if v, ok := _c.mutation.APIKey(); ok {
-		if err := project.APIKeyValidator(v); err != nil {
-			return &ValidationError{Name: "api_key", err: fmt.Errorf(`ent: validator failed for field "Project.api_key": %w`, err)}
+		if err := product.APIKeyValidator(v); err != nil {
+			return &ValidationError{Name: "api_key", err: fmt.Errorf(`ent: validator failed for field "Product.api_key": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Project.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Product.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Project.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Product.updated_at"`)}
 	}
 	if len(_c.mutation.OrganizationIDs()) == 0 {
-		return &ValidationError{Name: "organization", err: errors.New(`ent: missing required edge "Project.organization"`)}
+		return &ValidationError{Name: "organization", err: errors.New(`ent: missing required edge "Product.organization"`)}
 	}
 	return nil
 }
 
-func (_c *ProjectCreate) sqlSave(ctx context.Context) (*Project, error) {
+func (_c *ProductCreate) sqlSave(ctx context.Context) (*Product, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -266,45 +282,45 @@ func (_c *ProjectCreate) sqlSave(ctx context.Context) (*Project, error) {
 	return _node, nil
 }
 
-func (_c *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
+func (_c *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Project{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(project.Table, sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID))
+		_node = &Product{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(product.Table, sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID))
 	)
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
 	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(project.FieldName, field.TypeString, value)
+		_spec.SetField(product.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := _c.mutation.Slug(); ok {
-		_spec.SetField(project.FieldSlug, field.TypeString, value)
+		_spec.SetField(product.FieldSlug, field.TypeString, value)
 		_node.Slug = value
 	}
 	if value, ok := _c.mutation.APIKey(); ok {
-		_spec.SetField(project.FieldAPIKey, field.TypeString, value)
+		_spec.SetField(product.FieldAPIKey, field.TypeString, value)
 		_node.APIKey = value
 	}
 	if value, ok := _c.mutation.Settings(); ok {
-		_spec.SetField(project.FieldSettings, field.TypeJSON, value)
+		_spec.SetField(product.FieldSettings, field.TypeJSON, value)
 		_node.Settings = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(project.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(product.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(project.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if nodes := _c.mutation.OrganizationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   project.OrganizationTable,
-			Columns: []string{project.OrganizationColumn},
+			Table:   product.OrganizationTable,
+			Columns: []string{product.OrganizationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeUUID),
@@ -316,12 +332,28 @@ func (_c *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
 		_node.OrgID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := _c.mutation.CapabilitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.CapabilitiesTable,
+			Columns: []string{product.CapabilitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(capability.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := _c.mutation.EventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.EventsTable,
-			Columns: []string{project.EventsColumn},
+			Table:   product.EventsTable,
+			Columns: []string{product.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeUUID),
@@ -336,8 +368,8 @@ func (_c *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.SessionsTable,
-			Columns: []string{project.SessionsColumn},
+			Table:   product.SessionsTable,
+			Columns: []string{product.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
@@ -352,8 +384,8 @@ func (_c *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.JourneysTable,
-			Columns: []string{project.JourneysColumn},
+			Table:   product.JourneysTable,
+			Columns: []string{product.JourneysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(journey.FieldID, field.TypeUUID),
@@ -367,27 +399,27 @@ func (_c *ProjectCreate) createSpec() (*Project, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// ProjectCreateBulk is the builder for creating many Project entities in bulk.
-type ProjectCreateBulk struct {
+// ProductCreateBulk is the builder for creating many Product entities in bulk.
+type ProductCreateBulk struct {
 	config
 	err      error
-	builders []*ProjectCreate
+	builders []*ProductCreate
 }
 
-// Save creates the Project entities in the database.
-func (_c *ProjectCreateBulk) Save(ctx context.Context) ([]*Project, error) {
+// Save creates the Product entities in the database.
+func (_c *ProductCreateBulk) Save(ctx context.Context) ([]*Product, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*Project, len(_c.builders))
+	nodes := make([]*Product, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*ProjectMutation)
+				mutation, ok := m.(*ProductMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -430,7 +462,7 @@ func (_c *ProjectCreateBulk) Save(ctx context.Context) ([]*Project, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *ProjectCreateBulk) SaveX(ctx context.Context) []*Project {
+func (_c *ProductCreateBulk) SaveX(ctx context.Context) []*Product {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -439,13 +471,13 @@ func (_c *ProjectCreateBulk) SaveX(ctx context.Context) []*Project {
 }
 
 // Exec executes the query.
-func (_c *ProjectCreateBulk) Exec(ctx context.Context) error {
+func (_c *ProductCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *ProjectCreateBulk) ExecX(ctx context.Context) {
+func (_c *ProductCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

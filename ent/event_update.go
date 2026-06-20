@@ -15,7 +15,7 @@ import (
 	"github.com/plexusone/productgraph/ent/event"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 )
 
 // EventUpdate is the builder for updating Event entities.
@@ -45,16 +45,16 @@ func (_u *EventUpdate) SetNillableOrgID(v *uuid.UUID) *EventUpdate {
 	return _u
 }
 
-// SetProjectID sets the "project_id" field.
-func (_u *EventUpdate) SetProjectID(v uuid.UUID) *EventUpdate {
-	_u.mutation.SetProjectID(v)
+// SetProductID sets the "product_id" field.
+func (_u *EventUpdate) SetProductID(v uuid.UUID) *EventUpdate {
+	_u.mutation.SetProductID(v)
 	return _u
 }
 
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (_u *EventUpdate) SetNillableProjectID(v *uuid.UUID) *EventUpdate {
+// SetNillableProductID sets the "product_id" field if the given value is not nil.
+func (_u *EventUpdate) SetNillableProductID(v *uuid.UUID) *EventUpdate {
 	if v != nil {
-		_u.SetProjectID(*v)
+		_u.SetProductID(*v)
 	}
 	return _u
 }
@@ -944,9 +944,9 @@ func (_u *EventUpdate) ClearMetadata() *EventUpdate {
 	return _u
 }
 
-// SetProject sets the "project" edge to the Project entity.
-func (_u *EventUpdate) SetProject(v *Project) *EventUpdate {
-	return _u.SetProjectID(v.ID)
+// SetProduct sets the "product" edge to the Product entity.
+func (_u *EventUpdate) SetProduct(v *Product) *EventUpdate {
+	return _u.SetProductID(v.ID)
 }
 
 // SetJourney sets the "journey" edge to the Journey entity.
@@ -959,9 +959,9 @@ func (_u *EventUpdate) Mutation() *EventMutation {
 	return _u.mutation
 }
 
-// ClearProject clears the "project" edge to the Project entity.
-func (_u *EventUpdate) ClearProject() *EventUpdate {
-	_u.mutation.ClearProject()
+// ClearProduct clears the "product" edge to the Product entity.
+func (_u *EventUpdate) ClearProduct() *EventUpdate {
+	_u.mutation.ClearProduct()
 	return _u
 }
 
@@ -1135,8 +1135,8 @@ func (_u *EventUpdate) check() error {
 			return &ValidationError{Name: "snapshot_viewport", err: fmt.Errorf(`ent: validator failed for field "Event.snapshot_viewport": %w`, err)}
 		}
 	}
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Event.project"`)
+	if _u.mutation.ProductCleared() && len(_u.mutation.ProductIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Event.product"`)
 	}
 	return nil
 }
@@ -1420,28 +1420,28 @@ func (_u *EventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(event.FieldMetadata, field.TypeJSON)
 	}
-	if _u.mutation.ProjectCleared() {
+	if _u.mutation.ProductCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   event.ProjectTable,
-			Columns: []string{event.ProjectColumn},
+			Table:   event.ProductTable,
+			Columns: []string{event.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ProjectIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ProductIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   event.ProjectTable,
-			Columns: []string{event.ProjectColumn},
+			Table:   event.ProductTable,
+			Columns: []string{event.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1512,16 +1512,16 @@ func (_u *EventUpdateOne) SetNillableOrgID(v *uuid.UUID) *EventUpdateOne {
 	return _u
 }
 
-// SetProjectID sets the "project_id" field.
-func (_u *EventUpdateOne) SetProjectID(v uuid.UUID) *EventUpdateOne {
-	_u.mutation.SetProjectID(v)
+// SetProductID sets the "product_id" field.
+func (_u *EventUpdateOne) SetProductID(v uuid.UUID) *EventUpdateOne {
+	_u.mutation.SetProductID(v)
 	return _u
 }
 
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (_u *EventUpdateOne) SetNillableProjectID(v *uuid.UUID) *EventUpdateOne {
+// SetNillableProductID sets the "product_id" field if the given value is not nil.
+func (_u *EventUpdateOne) SetNillableProductID(v *uuid.UUID) *EventUpdateOne {
 	if v != nil {
-		_u.SetProjectID(*v)
+		_u.SetProductID(*v)
 	}
 	return _u
 }
@@ -2411,9 +2411,9 @@ func (_u *EventUpdateOne) ClearMetadata() *EventUpdateOne {
 	return _u
 }
 
-// SetProject sets the "project" edge to the Project entity.
-func (_u *EventUpdateOne) SetProject(v *Project) *EventUpdateOne {
-	return _u.SetProjectID(v.ID)
+// SetProduct sets the "product" edge to the Product entity.
+func (_u *EventUpdateOne) SetProduct(v *Product) *EventUpdateOne {
+	return _u.SetProductID(v.ID)
 }
 
 // SetJourney sets the "journey" edge to the Journey entity.
@@ -2426,9 +2426,9 @@ func (_u *EventUpdateOne) Mutation() *EventMutation {
 	return _u.mutation
 }
 
-// ClearProject clears the "project" edge to the Project entity.
-func (_u *EventUpdateOne) ClearProject() *EventUpdateOne {
-	_u.mutation.ClearProject()
+// ClearProduct clears the "product" edge to the Product entity.
+func (_u *EventUpdateOne) ClearProduct() *EventUpdateOne {
+	_u.mutation.ClearProduct()
 	return _u
 }
 
@@ -2615,8 +2615,8 @@ func (_u *EventUpdateOne) check() error {
 			return &ValidationError{Name: "snapshot_viewport", err: fmt.Errorf(`ent: validator failed for field "Event.snapshot_viewport": %w`, err)}
 		}
 	}
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Event.project"`)
+	if _u.mutation.ProductCleared() && len(_u.mutation.ProductIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Event.product"`)
 	}
 	return nil
 }
@@ -2917,28 +2917,28 @@ func (_u *EventUpdateOne) sqlSave(ctx context.Context) (_node *Event, err error)
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(event.FieldMetadata, field.TypeJSON)
 	}
-	if _u.mutation.ProjectCleared() {
+	if _u.mutation.ProductCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   event.ProjectTable,
-			Columns: []string{event.ProjectColumn},
+			Table:   event.ProductTable,
+			Columns: []string{event.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ProjectIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ProductIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   event.ProjectTable,
-			Columns: []string{event.ProjectColumn},
+			Table:   event.ProductTable,
+			Columns: []string{event.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

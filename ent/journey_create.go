@@ -12,8 +12,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/event"
+	"github.com/plexusone/productgraph/ent/feature"
 	"github.com/plexusone/productgraph/ent/journey"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
@@ -30,9 +31,23 @@ func (_c *JourneyCreate) SetOrgID(v uuid.UUID) *JourneyCreate {
 	return _c
 }
 
-// SetProjectID sets the "project_id" field.
-func (_c *JourneyCreate) SetProjectID(v uuid.UUID) *JourneyCreate {
-	_c.mutation.SetProjectID(v)
+// SetProductID sets the "product_id" field.
+func (_c *JourneyCreate) SetProductID(v uuid.UUID) *JourneyCreate {
+	_c.mutation.SetProductID(v)
+	return _c
+}
+
+// SetFeatureID sets the "feature_id" field.
+func (_c *JourneyCreate) SetFeatureID(v uuid.UUID) *JourneyCreate {
+	_c.mutation.SetFeatureID(v)
+	return _c
+}
+
+// SetNillableFeatureID sets the "feature_id" field if the given value is not nil.
+func (_c *JourneyCreate) SetNillableFeatureID(v *uuid.UUID) *JourneyCreate {
+	if v != nil {
+		_c.SetFeatureID(*v)
+	}
 	return _c
 }
 
@@ -200,9 +215,14 @@ func (_c *JourneyCreate) SetNillableID(v *uuid.UUID) *JourneyCreate {
 	return _c
 }
 
-// SetProject sets the "project" edge to the Project entity.
-func (_c *JourneyCreate) SetProject(v *Project) *JourneyCreate {
-	return _c.SetProjectID(v.ID)
+// SetProduct sets the "product" edge to the Product entity.
+func (_c *JourneyCreate) SetProduct(v *Product) *JourneyCreate {
+	return _c.SetProductID(v.ID)
+}
+
+// SetFeature sets the "feature" edge to the Feature entity.
+func (_c *JourneyCreate) SetFeature(v *Feature) *JourneyCreate {
+	return _c.SetFeatureID(v.ID)
 }
 
 // AddEventIDs adds the "events" edge to the Event entity by IDs.
@@ -313,8 +333,8 @@ func (_c *JourneyCreate) check() error {
 	if _, ok := _c.mutation.OrgID(); !ok {
 		return &ValidationError{Name: "org_id", err: errors.New(`ent: missing required field "Journey.org_id"`)}
 	}
-	if _, ok := _c.mutation.ProjectID(); !ok {
-		return &ValidationError{Name: "project_id", err: errors.New(`ent: missing required field "Journey.project_id"`)}
+	if _, ok := _c.mutation.ProductID(); !ok {
+		return &ValidationError{Name: "product_id", err: errors.New(`ent: missing required field "Journey.product_id"`)}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Journey.name"`)}
@@ -348,8 +368,8 @@ func (_c *JourneyCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Journey.updated_at"`)}
 	}
-	if len(_c.mutation.ProjectIDs()) == 0 {
-		return &ValidationError{Name: "project", err: errors.New(`ent: missing required edge "Journey.project"`)}
+	if len(_c.mutation.ProductIDs()) == 0 {
+		return &ValidationError{Name: "product", err: errors.New(`ent: missing required edge "Journey.product"`)}
 	}
 	return nil
 }
@@ -442,21 +462,38 @@ func (_c *JourneyCreate) createSpec() (*Journey, *sqlgraph.CreateSpec) {
 		_spec.SetField(journey.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := _c.mutation.ProjectIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ProductIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   journey.ProjectTable,
-			Columns: []string{journey.ProjectColumn},
+			Table:   journey.ProductTable,
+			Columns: []string{journey.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ProjectID = nodes[0]
+		_node.ProductID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.FeatureIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   journey.FeatureTable,
+			Columns: []string{journey.FeatureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feature.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.FeatureID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.EventsIDs(); len(nodes) > 0 {

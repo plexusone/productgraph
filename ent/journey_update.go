@@ -14,9 +14,10 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/event"
+	"github.com/plexusone/productgraph/ent/feature"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
@@ -47,17 +48,37 @@ func (_u *JourneyUpdate) SetNillableOrgID(v *uuid.UUID) *JourneyUpdate {
 	return _u
 }
 
-// SetProjectID sets the "project_id" field.
-func (_u *JourneyUpdate) SetProjectID(v uuid.UUID) *JourneyUpdate {
-	_u.mutation.SetProjectID(v)
+// SetProductID sets the "product_id" field.
+func (_u *JourneyUpdate) SetProductID(v uuid.UUID) *JourneyUpdate {
+	_u.mutation.SetProductID(v)
 	return _u
 }
 
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (_u *JourneyUpdate) SetNillableProjectID(v *uuid.UUID) *JourneyUpdate {
+// SetNillableProductID sets the "product_id" field if the given value is not nil.
+func (_u *JourneyUpdate) SetNillableProductID(v *uuid.UUID) *JourneyUpdate {
 	if v != nil {
-		_u.SetProjectID(*v)
+		_u.SetProductID(*v)
 	}
+	return _u
+}
+
+// SetFeatureID sets the "feature_id" field.
+func (_u *JourneyUpdate) SetFeatureID(v uuid.UUID) *JourneyUpdate {
+	_u.mutation.SetFeatureID(v)
+	return _u
+}
+
+// SetNillableFeatureID sets the "feature_id" field if the given value is not nil.
+func (_u *JourneyUpdate) SetNillableFeatureID(v *uuid.UUID) *JourneyUpdate {
+	if v != nil {
+		_u.SetFeatureID(*v)
+	}
+	return _u
+}
+
+// ClearFeatureID clears the value of the "feature_id" field.
+func (_u *JourneyUpdate) ClearFeatureID() *JourneyUpdate {
+	_u.mutation.ClearFeatureID()
 	return _u
 }
 
@@ -274,9 +295,14 @@ func (_u *JourneyUpdate) SetUpdatedAt(v time.Time) *JourneyUpdate {
 	return _u
 }
 
-// SetProject sets the "project" edge to the Project entity.
-func (_u *JourneyUpdate) SetProject(v *Project) *JourneyUpdate {
-	return _u.SetProjectID(v.ID)
+// SetProduct sets the "product" edge to the Product entity.
+func (_u *JourneyUpdate) SetProduct(v *Product) *JourneyUpdate {
+	return _u.SetProductID(v.ID)
+}
+
+// SetFeature sets the "feature" edge to the Feature entity.
+func (_u *JourneyUpdate) SetFeature(v *Feature) *JourneyUpdate {
+	return _u.SetFeatureID(v.ID)
 }
 
 // AddEventIDs adds the "events" edge to the Event entity by IDs.
@@ -314,9 +340,15 @@ func (_u *JourneyUpdate) Mutation() *JourneyMutation {
 	return _u.mutation
 }
 
-// ClearProject clears the "project" edge to the Project entity.
-func (_u *JourneyUpdate) ClearProject() *JourneyUpdate {
-	_u.mutation.ClearProject()
+// ClearProduct clears the "product" edge to the Product entity.
+func (_u *JourneyUpdate) ClearProduct() *JourneyUpdate {
+	_u.mutation.ClearProduct()
+	return _u
+}
+
+// ClearFeature clears the "feature" edge to the Feature entity.
+func (_u *JourneyUpdate) ClearFeature() *JourneyUpdate {
+	_u.mutation.ClearFeature()
 	return _u
 }
 
@@ -405,8 +437,8 @@ func (_u *JourneyUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Journey.name": %w`, err)}
 		}
 	}
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Journey.project"`)
+	if _u.mutation.ProductCleared() && len(_u.mutation.ProductIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Journey.product"`)
 	}
 	return nil
 }
@@ -504,28 +536,57 @@ func (_u *JourneyUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(journey.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.ProjectCleared() {
+	if _u.mutation.ProductCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   journey.ProjectTable,
-			Columns: []string{journey.ProjectColumn},
+			Table:   journey.ProductTable,
+			Columns: []string{journey.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ProjectIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ProductIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   journey.ProjectTable,
-			Columns: []string{journey.ProjectColumn},
+			Table:   journey.ProductTable,
+			Columns: []string{journey.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.FeatureCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   journey.FeatureTable,
+			Columns: []string{journey.FeatureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feature.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.FeatureIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   journey.FeatureTable,
+			Columns: []string{journey.FeatureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feature.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -657,17 +718,37 @@ func (_u *JourneyUpdateOne) SetNillableOrgID(v *uuid.UUID) *JourneyUpdateOne {
 	return _u
 }
 
-// SetProjectID sets the "project_id" field.
-func (_u *JourneyUpdateOne) SetProjectID(v uuid.UUID) *JourneyUpdateOne {
-	_u.mutation.SetProjectID(v)
+// SetProductID sets the "product_id" field.
+func (_u *JourneyUpdateOne) SetProductID(v uuid.UUID) *JourneyUpdateOne {
+	_u.mutation.SetProductID(v)
 	return _u
 }
 
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (_u *JourneyUpdateOne) SetNillableProjectID(v *uuid.UUID) *JourneyUpdateOne {
+// SetNillableProductID sets the "product_id" field if the given value is not nil.
+func (_u *JourneyUpdateOne) SetNillableProductID(v *uuid.UUID) *JourneyUpdateOne {
 	if v != nil {
-		_u.SetProjectID(*v)
+		_u.SetProductID(*v)
 	}
+	return _u
+}
+
+// SetFeatureID sets the "feature_id" field.
+func (_u *JourneyUpdateOne) SetFeatureID(v uuid.UUID) *JourneyUpdateOne {
+	_u.mutation.SetFeatureID(v)
+	return _u
+}
+
+// SetNillableFeatureID sets the "feature_id" field if the given value is not nil.
+func (_u *JourneyUpdateOne) SetNillableFeatureID(v *uuid.UUID) *JourneyUpdateOne {
+	if v != nil {
+		_u.SetFeatureID(*v)
+	}
+	return _u
+}
+
+// ClearFeatureID clears the value of the "feature_id" field.
+func (_u *JourneyUpdateOne) ClearFeatureID() *JourneyUpdateOne {
+	_u.mutation.ClearFeatureID()
 	return _u
 }
 
@@ -884,9 +965,14 @@ func (_u *JourneyUpdateOne) SetUpdatedAt(v time.Time) *JourneyUpdateOne {
 	return _u
 }
 
-// SetProject sets the "project" edge to the Project entity.
-func (_u *JourneyUpdateOne) SetProject(v *Project) *JourneyUpdateOne {
-	return _u.SetProjectID(v.ID)
+// SetProduct sets the "product" edge to the Product entity.
+func (_u *JourneyUpdateOne) SetProduct(v *Product) *JourneyUpdateOne {
+	return _u.SetProductID(v.ID)
+}
+
+// SetFeature sets the "feature" edge to the Feature entity.
+func (_u *JourneyUpdateOne) SetFeature(v *Feature) *JourneyUpdateOne {
+	return _u.SetFeatureID(v.ID)
 }
 
 // AddEventIDs adds the "events" edge to the Event entity by IDs.
@@ -924,9 +1010,15 @@ func (_u *JourneyUpdateOne) Mutation() *JourneyMutation {
 	return _u.mutation
 }
 
-// ClearProject clears the "project" edge to the Project entity.
-func (_u *JourneyUpdateOne) ClearProject() *JourneyUpdateOne {
-	_u.mutation.ClearProject()
+// ClearProduct clears the "product" edge to the Product entity.
+func (_u *JourneyUpdateOne) ClearProduct() *JourneyUpdateOne {
+	_u.mutation.ClearProduct()
+	return _u
+}
+
+// ClearFeature clears the "feature" edge to the Feature entity.
+func (_u *JourneyUpdateOne) ClearFeature() *JourneyUpdateOne {
+	_u.mutation.ClearFeature()
 	return _u
 }
 
@@ -1028,8 +1120,8 @@ func (_u *JourneyUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Journey.name": %w`, err)}
 		}
 	}
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Journey.project"`)
+	if _u.mutation.ProductCleared() && len(_u.mutation.ProductIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Journey.product"`)
 	}
 	return nil
 }
@@ -1144,28 +1236,57 @@ func (_u *JourneyUpdateOne) sqlSave(ctx context.Context) (_node *Journey, err er
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(journey.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.ProjectCleared() {
+	if _u.mutation.ProductCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   journey.ProjectTable,
-			Columns: []string{journey.ProjectColumn},
+			Table:   journey.ProductTable,
+			Columns: []string{journey.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ProjectIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ProductIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   journey.ProjectTable,
-			Columns: []string{journey.ProjectColumn},
+			Table:   journey.ProductTable,
+			Columns: []string{journey.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.FeatureCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   journey.FeatureTable,
+			Columns: []string{journey.FeatureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feature.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.FeatureIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   journey.FeatureTable,
+			Columns: []string{journey.FeatureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feature.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

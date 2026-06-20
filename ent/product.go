@@ -12,11 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/organization"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 )
 
-// Project is the model entity for the Project schema.
-type Project struct {
+// Product is the model entity for the Product schema.
+type Product struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
@@ -35,15 +35,17 @@ type Project struct {
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the ProjectQuery when eager-loading is set.
-	Edges        ProjectEdges `json:"edges"`
+	// The values are being populated by the ProductQuery when eager-loading is set.
+	Edges        ProductEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// ProjectEdges holds the relations/edges for other nodes in the graph.
-type ProjectEdges struct {
+// ProductEdges holds the relations/edges for other nodes in the graph.
+type ProductEdges struct {
 	// Organization holds the value of the organization edge.
 	Organization *Organization `json:"organization,omitempty"`
+	// Capabilities holds the value of the capabilities edge.
+	Capabilities []*Capability `json:"capabilities,omitempty"`
 	// Events holds the value of the events edge.
 	Events []*Event `json:"events,omitempty"`
 	// Sessions holds the value of the sessions edge.
@@ -52,12 +54,12 @@ type ProjectEdges struct {
 	Journeys []*Journey `json:"journeys,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // OrganizationOrErr returns the Organization value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e ProjectEdges) OrganizationOrErr() (*Organization, error) {
+func (e ProductEdges) OrganizationOrErr() (*Organization, error) {
 	if e.Organization != nil {
 		return e.Organization, nil
 	} else if e.loadedTypes[0] {
@@ -66,10 +68,19 @@ func (e ProjectEdges) OrganizationOrErr() (*Organization, error) {
 	return nil, &NotLoadedError{edge: "organization"}
 }
 
+// CapabilitiesOrErr returns the Capabilities value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProductEdges) CapabilitiesOrErr() ([]*Capability, error) {
+	if e.loadedTypes[1] {
+		return e.Capabilities, nil
+	}
+	return nil, &NotLoadedError{edge: "capabilities"}
+}
+
 // EventsOrErr returns the Events value or an error if the edge
 // was not loaded in eager-loading.
-func (e ProjectEdges) EventsOrErr() ([]*Event, error) {
-	if e.loadedTypes[1] {
+func (e ProductEdges) EventsOrErr() ([]*Event, error) {
+	if e.loadedTypes[2] {
 		return e.Events, nil
 	}
 	return nil, &NotLoadedError{edge: "events"}
@@ -77,8 +88,8 @@ func (e ProjectEdges) EventsOrErr() ([]*Event, error) {
 
 // SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
-func (e ProjectEdges) SessionsOrErr() ([]*Session, error) {
-	if e.loadedTypes[2] {
+func (e ProductEdges) SessionsOrErr() ([]*Session, error) {
+	if e.loadedTypes[3] {
 		return e.Sessions, nil
 	}
 	return nil, &NotLoadedError{edge: "sessions"}
@@ -86,25 +97,25 @@ func (e ProjectEdges) SessionsOrErr() ([]*Session, error) {
 
 // JourneysOrErr returns the Journeys value or an error if the edge
 // was not loaded in eager-loading.
-func (e ProjectEdges) JourneysOrErr() ([]*Journey, error) {
-	if e.loadedTypes[3] {
+func (e ProductEdges) JourneysOrErr() ([]*Journey, error) {
+	if e.loadedTypes[4] {
 		return e.Journeys, nil
 	}
 	return nil, &NotLoadedError{edge: "journeys"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Project) scanValues(columns []string) ([]any, error) {
+func (*Product) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case project.FieldSettings:
+		case product.FieldSettings:
 			values[i] = new([]byte)
-		case project.FieldName, project.FieldSlug, project.FieldAPIKey:
+		case product.FieldName, product.FieldSlug, product.FieldAPIKey:
 			values[i] = new(sql.NullString)
-		case project.FieldCreatedAt, project.FieldUpdatedAt:
+		case product.FieldCreatedAt, product.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case project.FieldID, project.FieldOrgID:
+		case product.FieldID, product.FieldOrgID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -114,44 +125,44 @@ func (*Project) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Project fields.
-func (_m *Project) assignValues(columns []string, values []any) error {
+// to the Product fields.
+func (_m *Product) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case project.FieldID:
+		case product.FieldID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				_m.ID = *value
 			}
-		case project.FieldOrgID:
+		case product.FieldOrgID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field org_id", values[i])
 			} else if value != nil {
 				_m.OrgID = *value
 			}
-		case project.FieldName:
+		case product.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case project.FieldSlug:
+		case product.FieldSlug:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field slug", values[i])
 			} else if value.Valid {
 				_m.Slug = value.String
 			}
-		case project.FieldAPIKey:
+		case product.FieldAPIKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field api_key", values[i])
 			} else if value.Valid {
 				_m.APIKey = value.String
 			}
-		case project.FieldSettings:
+		case product.FieldSettings:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field settings", values[i])
 			} else if value != nil && len(*value) > 0 {
@@ -159,13 +170,13 @@ func (_m *Project) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field settings: %w", err)
 				}
 			}
-		case project.FieldCreatedAt:
+		case product.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case project.FieldUpdatedAt:
+		case product.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
@@ -178,54 +189,59 @@ func (_m *Project) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the Project.
+// Value returns the ent.Value that was dynamically selected and assigned to the Product.
 // This includes values selected through modifiers, order, etc.
-func (_m *Project) Value(name string) (ent.Value, error) {
+func (_m *Product) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryOrganization queries the "organization" edge of the Project entity.
-func (_m *Project) QueryOrganization() *OrganizationQuery {
-	return NewProjectClient(_m.config).QueryOrganization(_m)
+// QueryOrganization queries the "organization" edge of the Product entity.
+func (_m *Product) QueryOrganization() *OrganizationQuery {
+	return NewProductClient(_m.config).QueryOrganization(_m)
 }
 
-// QueryEvents queries the "events" edge of the Project entity.
-func (_m *Project) QueryEvents() *EventQuery {
-	return NewProjectClient(_m.config).QueryEvents(_m)
+// QueryCapabilities queries the "capabilities" edge of the Product entity.
+func (_m *Product) QueryCapabilities() *CapabilityQuery {
+	return NewProductClient(_m.config).QueryCapabilities(_m)
 }
 
-// QuerySessions queries the "sessions" edge of the Project entity.
-func (_m *Project) QuerySessions() *SessionQuery {
-	return NewProjectClient(_m.config).QuerySessions(_m)
+// QueryEvents queries the "events" edge of the Product entity.
+func (_m *Product) QueryEvents() *EventQuery {
+	return NewProductClient(_m.config).QueryEvents(_m)
 }
 
-// QueryJourneys queries the "journeys" edge of the Project entity.
-func (_m *Project) QueryJourneys() *JourneyQuery {
-	return NewProjectClient(_m.config).QueryJourneys(_m)
+// QuerySessions queries the "sessions" edge of the Product entity.
+func (_m *Product) QuerySessions() *SessionQuery {
+	return NewProductClient(_m.config).QuerySessions(_m)
 }
 
-// Update returns a builder for updating this Project.
-// Note that you need to call Project.Unwrap() before calling this method if this Project
+// QueryJourneys queries the "journeys" edge of the Product entity.
+func (_m *Product) QueryJourneys() *JourneyQuery {
+	return NewProductClient(_m.config).QueryJourneys(_m)
+}
+
+// Update returns a builder for updating this Product.
+// Note that you need to call Product.Unwrap() before calling this method if this Product
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *Project) Update() *ProjectUpdateOne {
-	return NewProjectClient(_m.config).UpdateOne(_m)
+func (_m *Product) Update() *ProductUpdateOne {
+	return NewProductClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the Project entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Product entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *Project) Unwrap() *Project {
+func (_m *Product) Unwrap() *Product {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Project is not a transactional entity")
+		panic("ent: Product is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *Project) String() string {
+func (_m *Product) String() string {
 	var builder strings.Builder
-	builder.WriteString("Project(")
+	builder.WriteString("Product(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("org_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrgID))
@@ -250,5 +266,5 @@ func (_m *Project) String() string {
 	return builder.String()
 }
 
-// Projects is a parsable slice of Project.
-type Projects []*Project
+// Products is a parsable slice of Product.
+type Products []*Product

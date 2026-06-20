@@ -8,30 +8,30 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/plexusone/productgraph/ent/capability"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/project"
 )
 
-// ProjectDelete is the builder for deleting a Project entity.
-type ProjectDelete struct {
+// CapabilityDelete is the builder for deleting a Capability entity.
+type CapabilityDelete struct {
 	config
 	hooks    []Hook
-	mutation *ProjectMutation
+	mutation *CapabilityMutation
 }
 
-// Where appends a list predicates to the ProjectDelete builder.
-func (_d *ProjectDelete) Where(ps ...predicate.Project) *ProjectDelete {
+// Where appends a list predicates to the CapabilityDelete builder.
+func (_d *CapabilityDelete) Where(ps ...predicate.Capability) *CapabilityDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *ProjectDelete) Exec(ctx context.Context) (int, error) {
+func (_d *CapabilityDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *ProjectDelete) ExecX(ctx context.Context) int {
+func (_d *CapabilityDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *ProjectDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *ProjectDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(project.Table, sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID))
+func (_d *CapabilityDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(capability.Table, sqlgraph.NewFieldSpec(capability.FieldID, field.TypeUUID))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *ProjectDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// ProjectDeleteOne is the builder for deleting a single Project entity.
-type ProjectDeleteOne struct {
-	_d *ProjectDelete
+// CapabilityDeleteOne is the builder for deleting a single Capability entity.
+type CapabilityDeleteOne struct {
+	_d *CapabilityDelete
 }
 
-// Where appends a list predicates to the ProjectDelete builder.
-func (_d *ProjectDeleteOne) Where(ps ...predicate.Project) *ProjectDeleteOne {
+// Where appends a list predicates to the CapabilityDelete builder.
+func (_d *CapabilityDeleteOne) Where(ps ...predicate.Capability) *CapabilityDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *ProjectDeleteOne) Exec(ctx context.Context) error {
+func (_d *CapabilityDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{project.Label}
+		return &NotFoundError{capability.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *ProjectDeleteOne) ExecX(ctx context.Context) {
+func (_d *CapabilityDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

@@ -39,6 +39,6 @@ func (Organization) Fields() []ent.Field {
 // Edges of the Organization.
 func (Organization) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("projects", Project.Type),
+		edge.To("products", Product.Type),
 	}
 }

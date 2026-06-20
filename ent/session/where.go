@@ -61,9 +61,9 @@ func OrgID(v uuid.UUID) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldOrgID, v))
 }
 
-// ProjectID applies equality check predicate on the "project_id" field. It's identical to ProjectIDEQ.
-func ProjectID(v uuid.UUID) predicate.Session {
-	return predicate.Session(sql.FieldEQ(FieldProjectID, v))
+// ProductID applies equality check predicate on the "product_id" field. It's identical to ProductIDEQ.
+func ProductID(v uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldProductID, v))
 }
 
 // SessionID applies equality check predicate on the "session_id" field. It's identical to SessionIDEQ.
@@ -211,24 +211,24 @@ func OrgIDLTE(v uuid.UUID) predicate.Session {
 	return predicate.Session(sql.FieldLTE(FieldOrgID, v))
 }
 
-// ProjectIDEQ applies the EQ predicate on the "project_id" field.
-func ProjectIDEQ(v uuid.UUID) predicate.Session {
-	return predicate.Session(sql.FieldEQ(FieldProjectID, v))
+// ProductIDEQ applies the EQ predicate on the "product_id" field.
+func ProductIDEQ(v uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldProductID, v))
 }
 
-// ProjectIDNEQ applies the NEQ predicate on the "project_id" field.
-func ProjectIDNEQ(v uuid.UUID) predicate.Session {
-	return predicate.Session(sql.FieldNEQ(FieldProjectID, v))
+// ProductIDNEQ applies the NEQ predicate on the "product_id" field.
+func ProductIDNEQ(v uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldNEQ(FieldProductID, v))
 }
 
-// ProjectIDIn applies the In predicate on the "project_id" field.
-func ProjectIDIn(vs ...uuid.UUID) predicate.Session {
-	return predicate.Session(sql.FieldIn(FieldProjectID, vs...))
+// ProductIDIn applies the In predicate on the "product_id" field.
+func ProductIDIn(vs ...uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldIn(FieldProductID, vs...))
 }
 
-// ProjectIDNotIn applies the NotIn predicate on the "project_id" field.
-func ProjectIDNotIn(vs ...uuid.UUID) predicate.Session {
-	return predicate.Session(sql.FieldNotIn(FieldProjectID, vs...))
+// ProductIDNotIn applies the NotIn predicate on the "product_id" field.
+func ProductIDNotIn(vs ...uuid.UUID) predicate.Session {
+	return predicate.Session(sql.FieldNotIn(FieldProductID, vs...))
 }
 
 // SessionIDEQ applies the EQ predicate on the "session_id" field.
@@ -1516,21 +1516,21 @@ func UpdatedAtLTE(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
-// HasProject applies the HasEdge predicate on the "project" edge.
-func HasProject() predicate.Session {
+// HasProduct applies the HasEdge predicate on the "product" edge.
+func HasProduct() predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ProjectTable, ProjectColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProductTable, ProductColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasProjectWith applies the HasEdge predicate on the "project" edge with a given conditions (other predicates).
-func HasProjectWith(preds ...predicate.Project) predicate.Session {
+// HasProductWith applies the HasEdge predicate on the "product" edge with a given conditions (other predicates).
+func HasProductWith(preds ...predicate.Product) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		step := newProjectStep()
+		step := newProductStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -15,7 +15,7 @@ import (
 	"github.com/plexusone/productgraph/ent/event"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 )
 
 // EventQuery is the builder for querying Event entities.
@@ -25,7 +25,7 @@ type EventQuery struct {
 	order       []event.OrderOption
 	inters      []Interceptor
 	predicates  []predicate.Event
-	withProject *ProjectQuery
+	withProduct *ProductQuery
 	withJourney *JourneyQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -63,9 +63,9 @@ func (_q *EventQuery) Order(o ...event.OrderOption) *EventQuery {
 	return _q
 }
 
-// QueryProject chains the current query on the "project" edge.
-func (_q *EventQuery) QueryProject() *ProjectQuery {
-	query := (&ProjectClient{config: _q.config}).Query()
+// QueryProduct chains the current query on the "product" edge.
+func (_q *EventQuery) QueryProduct() *ProductQuery {
+	query := (&ProductClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -76,8 +76,8 @@ func (_q *EventQuery) QueryProject() *ProjectQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(event.Table, event.FieldID, selector),
-			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, event.ProjectTable, event.ProjectColumn),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, event.ProductTable, event.ProductColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -299,7 +299,7 @@ func (_q *EventQuery) Clone() *EventQuery {
 		order:       append([]event.OrderOption{}, _q.order...),
 		inters:      append([]Interceptor{}, _q.inters...),
 		predicates:  append([]predicate.Event{}, _q.predicates...),
-		withProject: _q.withProject.Clone(),
+		withProduct: _q.withProduct.Clone(),
 		withJourney: _q.withJourney.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
@@ -307,14 +307,14 @@ func (_q *EventQuery) Clone() *EventQuery {
 	}
 }
 
-// WithProject tells the query-builder to eager-load the nodes that are connected to
-// the "project" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *EventQuery) WithProject(opts ...func(*ProjectQuery)) *EventQuery {
-	query := (&ProjectClient{config: _q.config}).Query()
+// WithProduct tells the query-builder to eager-load the nodes that are connected to
+// the "product" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *EventQuery) WithProduct(opts ...func(*ProductQuery)) *EventQuery {
+	query := (&ProductClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withProject = query
+	_q.withProduct = query
 	return _q
 }
 
@@ -408,7 +408,7 @@ func (_q *EventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Event,
 		nodes       = []*Event{}
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			_q.withProject != nil,
+			_q.withProduct != nil,
 			_q.withJourney != nil,
 		}
 	)
@@ -430,9 +430,9 @@ func (_q *EventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Event,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withProject; query != nil {
-		if err := _q.loadProject(ctx, query, nodes, nil,
-			func(n *Event, e *Project) { n.Edges.Project = e }); err != nil {
+	if query := _q.withProduct; query != nil {
+		if err := _q.loadProduct(ctx, query, nodes, nil,
+			func(n *Event, e *Product) { n.Edges.Product = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -445,11 +445,11 @@ func (_q *EventQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Event,
 	return nodes, nil
 }
 
-func (_q *EventQuery) loadProject(ctx context.Context, query *ProjectQuery, nodes []*Event, init func(*Event), assign func(*Event, *Project)) error {
+func (_q *EventQuery) loadProduct(ctx context.Context, query *ProductQuery, nodes []*Event, init func(*Event), assign func(*Event, *Product)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*Event)
 	for i := range nodes {
-		fk := nodes[i].ProjectID
+		fk := nodes[i].ProductID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -458,7 +458,7 @@ func (_q *EventQuery) loadProject(ctx context.Context, query *ProjectQuery, node
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(project.IDIn(ids...))
+	query.Where(product.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -466,7 +466,7 @@ func (_q *EventQuery) loadProject(ctx context.Context, query *ProjectQuery, node
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "project_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "product_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -532,8 +532,8 @@ func (_q *EventQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if _q.withProject != nil {
-			_spec.Node.AddColumnOnce(event.FieldProjectID)
+		if _q.withProduct != nil {
+			_spec.Node.AddColumnOnce(event.FieldProductID)
 		}
 		if _q.withJourney != nil {
 			_spec.Node.AddColumnOnce(event.FieldJourneyID)

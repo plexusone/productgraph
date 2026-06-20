@@ -10,13 +10,13 @@ import (
 	"github.com/google/uuid"
 )
 
-// Project holds the schema definition for the Project entity.
-type Project struct {
+// Product holds the schema definition for the Product entity.
+type Product struct {
 	ent.Schema
 }
 
-// Fields of the Project.
-func (Project) Fields() []ent.Field {
+// Fields of the Product.
+func (Product) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New).
@@ -44,22 +44,23 @@ func (Project) Fields() []ent.Field {
 	}
 }
 
-// Edges of the Project.
-func (Project) Edges() []ent.Edge {
+// Edges of the Product.
+func (Product) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("organization", Organization.Type).
-			Ref("projects").
+			Ref("products").
 			Field("org_id").
 			Unique().
 			Required(),
+		edge.To("capabilities", Capability.Type),
 		edge.To("events", Event.Type),
 		edge.To("sessions", Session.Type),
 		edge.To("journeys", Journey.Type),
 	}
 }
 
-// Indexes of the Project.
-func (Project) Indexes() []ent.Index {
+// Indexes of the Product.
+func (Product) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("org_id", "slug").Unique(),
 		index.Fields("api_key"),

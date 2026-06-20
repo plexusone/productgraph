@@ -15,7 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/organization"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 )
 
 // OrganizationQuery is the builder for querying Organization entities.
@@ -25,7 +25,7 @@ type OrganizationQuery struct {
 	order        []organization.OrderOption
 	inters       []Interceptor
 	predicates   []predicate.Organization
-	withProjects *ProjectQuery
+	withProducts *ProductQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,9 +62,9 @@ func (_q *OrganizationQuery) Order(o ...organization.OrderOption) *OrganizationQ
 	return _q
 }
 
-// QueryProjects chains the current query on the "projects" edge.
-func (_q *OrganizationQuery) QueryProjects() *ProjectQuery {
-	query := (&ProjectClient{config: _q.config}).Query()
+// QueryProducts chains the current query on the "products" edge.
+func (_q *OrganizationQuery) QueryProducts() *ProductQuery {
+	query := (&ProductClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -75,8 +75,8 @@ func (_q *OrganizationQuery) QueryProjects() *ProjectQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(organization.Table, organization.FieldID, selector),
-			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, organization.ProjectsTable, organization.ProjectsColumn),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, organization.ProductsTable, organization.ProductsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -276,21 +276,21 @@ func (_q *OrganizationQuery) Clone() *OrganizationQuery {
 		order:        append([]organization.OrderOption{}, _q.order...),
 		inters:       append([]Interceptor{}, _q.inters...),
 		predicates:   append([]predicate.Organization{}, _q.predicates...),
-		withProjects: _q.withProjects.Clone(),
+		withProducts: _q.withProducts.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithProjects tells the query-builder to eager-load the nodes that are connected to
-// the "projects" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *OrganizationQuery) WithProjects(opts ...func(*ProjectQuery)) *OrganizationQuery {
-	query := (&ProjectClient{config: _q.config}).Query()
+// WithProducts tells the query-builder to eager-load the nodes that are connected to
+// the "products" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *OrganizationQuery) WithProducts(opts ...func(*ProductQuery)) *OrganizationQuery {
+	query := (&ProductClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withProjects = query
+	_q.withProducts = query
 	return _q
 }
 
@@ -373,7 +373,7 @@ func (_q *OrganizationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		nodes       = []*Organization{}
 		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
-			_q.withProjects != nil,
+			_q.withProducts != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -394,17 +394,17 @@ func (_q *OrganizationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withProjects; query != nil {
-		if err := _q.loadProjects(ctx, query, nodes,
-			func(n *Organization) { n.Edges.Projects = []*Project{} },
-			func(n *Organization, e *Project) { n.Edges.Projects = append(n.Edges.Projects, e) }); err != nil {
+	if query := _q.withProducts; query != nil {
+		if err := _q.loadProducts(ctx, query, nodes,
+			func(n *Organization) { n.Edges.Products = []*Product{} },
+			func(n *Organization, e *Product) { n.Edges.Products = append(n.Edges.Products, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *OrganizationQuery) loadProjects(ctx context.Context, query *ProjectQuery, nodes []*Organization, init func(*Organization), assign func(*Organization, *Project)) error {
+func (_q *OrganizationQuery) loadProducts(ctx context.Context, query *ProductQuery, nodes []*Organization, init func(*Organization), assign func(*Organization, *Product)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Organization)
 	for i := range nodes {
@@ -415,10 +415,10 @@ func (_q *OrganizationQuery) loadProjects(ctx context.Context, query *ProjectQue
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(project.FieldOrgID)
+		query.ctx.AppendFieldOnce(product.FieldOrgID)
 	}
-	query.Where(predicate.Project(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(organization.ProjectsColumn), fks...))
+	query.Where(predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(organization.ProductsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

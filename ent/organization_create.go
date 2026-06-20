@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/organization"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 )
 
 // OrganizationCreate is the builder for creating a Organization entity.
@@ -76,19 +76,19 @@ func (_c *OrganizationCreate) SetNillableID(v *uuid.UUID) *OrganizationCreate {
 	return _c
 }
 
-// AddProjectIDs adds the "projects" edge to the Project entity by IDs.
-func (_c *OrganizationCreate) AddProjectIDs(ids ...uuid.UUID) *OrganizationCreate {
-	_c.mutation.AddProjectIDs(ids...)
+// AddProductIDs adds the "products" edge to the Product entity by IDs.
+func (_c *OrganizationCreate) AddProductIDs(ids ...uuid.UUID) *OrganizationCreate {
+	_c.mutation.AddProductIDs(ids...)
 	return _c
 }
 
-// AddProjects adds the "projects" edges to the Project entity.
-func (_c *OrganizationCreate) AddProjects(v ...*Project) *OrganizationCreate {
+// AddProducts adds the "products" edges to the Product entity.
+func (_c *OrganizationCreate) AddProducts(v ...*Product) *OrganizationCreate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddProjectIDs(ids...)
+	return _c.AddProductIDs(ids...)
 }
 
 // Mutation returns the OrganizationMutation object of the builder.
@@ -215,15 +215,15 @@ func (_c *OrganizationCreate) createSpec() (*Organization, *sqlgraph.CreateSpec)
 		_spec.SetField(organization.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := _c.mutation.ProjectsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ProductsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   organization.ProjectsTable,
-			Columns: []string{organization.ProjectsColumn},
+			Table:   organization.ProductsTable,
+			Columns: []string{organization.ProductsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

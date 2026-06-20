@@ -11,8 +11,9 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
+	"github.com/plexusone/productgraph/ent/feature"
 	"github.com/plexusone/productgraph/ent/journey"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 )
 
 // Journey is the model entity for the Journey schema.
@@ -22,8 +23,10 @@ type Journey struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// OrgID holds the value of the "org_id" field.
 	OrgID uuid.UUID `json:"org_id,omitempty"`
-	// ProjectID holds the value of the "project_id" field.
-	ProjectID uuid.UUID `json:"project_id,omitempty"`
+	// ProductID holds the value of the "product_id" field.
+	ProductID uuid.UUID `json:"product_id,omitempty"`
+	// FeatureID holds the value of the "feature_id" field.
+	FeatureID *uuid.UUID `json:"feature_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Description holds the value of the "description" field.
@@ -58,32 +61,45 @@ type Journey struct {
 
 // JourneyEdges holds the relations/edges for other nodes in the graph.
 type JourneyEdges struct {
-	// Project holds the value of the project edge.
-	Project *Project `json:"project,omitempty"`
+	// Product holds the value of the product edge.
+	Product *Product `json:"product,omitempty"`
+	// Feature holds the value of the feature edge.
+	Feature *Feature `json:"feature,omitempty"`
 	// Events holds the value of the events edge.
 	Events []*Event `json:"events,omitempty"`
 	// Sessions holds the value of the sessions edge.
 	Sessions []*Session `json:"sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
-// ProjectOrErr returns the Project value or an error if the edge
+// ProductOrErr returns the Product value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e JourneyEdges) ProjectOrErr() (*Project, error) {
-	if e.Project != nil {
-		return e.Project, nil
+func (e JourneyEdges) ProductOrErr() (*Product, error) {
+	if e.Product != nil {
+		return e.Product, nil
 	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: project.Label}
+		return nil, &NotFoundError{label: product.Label}
 	}
-	return nil, &NotLoadedError{edge: "project"}
+	return nil, &NotLoadedError{edge: "product"}
+}
+
+// FeatureOrErr returns the Feature value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e JourneyEdges) FeatureOrErr() (*Feature, error) {
+	if e.Feature != nil {
+		return e.Feature, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: feature.Label}
+	}
+	return nil, &NotLoadedError{edge: "feature"}
 }
 
 // EventsOrErr returns the Events value or an error if the edge
 // was not loaded in eager-loading.
 func (e JourneyEdges) EventsOrErr() ([]*Event, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Events, nil
 	}
 	return nil, &NotLoadedError{edge: "events"}
@@ -92,7 +108,7 @@ func (e JourneyEdges) EventsOrErr() ([]*Event, error) {
 // SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e JourneyEdges) SessionsOrErr() ([]*Session, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Sessions, nil
 	}
 	return nil, &NotLoadedError{edge: "sessions"}
@@ -103,6 +119,8 @@ func (*Journey) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case journey.FieldFeatureID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case journey.FieldEntryConditions, journey.FieldExitConditions, journey.FieldSteps:
 			values[i] = new([]byte)
 		case journey.FieldIsActive:
@@ -115,7 +133,7 @@ func (*Journey) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case journey.FieldCreatedAt, journey.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case journey.FieldID, journey.FieldOrgID, journey.FieldProjectID:
+		case journey.FieldID, journey.FieldOrgID, journey.FieldProductID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -144,11 +162,18 @@ func (_m *Journey) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.OrgID = *value
 			}
-		case journey.FieldProjectID:
+		case journey.FieldProductID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field project_id", values[i])
+				return fmt.Errorf("unexpected type %T for field product_id", values[i])
 			} else if value != nil {
-				_m.ProjectID = *value
+				_m.ProductID = *value
+			}
+		case journey.FieldFeatureID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field feature_id", values[i])
+			} else if value.Valid {
+				_m.FeatureID = new(uuid.UUID)
+				*_m.FeatureID = *value.S.(*uuid.UUID)
 			}
 		case journey.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -247,9 +272,14 @@ func (_m *Journey) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryProject queries the "project" edge of the Journey entity.
-func (_m *Journey) QueryProject() *ProjectQuery {
-	return NewJourneyClient(_m.config).QueryProject(_m)
+// QueryProduct queries the "product" edge of the Journey entity.
+func (_m *Journey) QueryProduct() *ProductQuery {
+	return NewJourneyClient(_m.config).QueryProduct(_m)
+}
+
+// QueryFeature queries the "feature" edge of the Journey entity.
+func (_m *Journey) QueryFeature() *FeatureQuery {
+	return NewJourneyClient(_m.config).QueryFeature(_m)
 }
 
 // QueryEvents queries the "events" edge of the Journey entity.
@@ -288,8 +318,13 @@ func (_m *Journey) String() string {
 	builder.WriteString("org_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrgID))
 	builder.WriteString(", ")
-	builder.WriteString("project_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ProjectID))
+	builder.WriteString("product_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProductID))
+	builder.WriteString(", ")
+	if v := _m.FeatureID; v != nil {
+		builder.WriteString("feature_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)

@@ -6,8 +6,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Capability is the predicate function for capability builders.
+type Capability func(*sql.Selector)
+
 // Event is the predicate function for event builders.
 type Event func(*sql.Selector)
+
+// Feature is the predicate function for feature builders.
+type Feature func(*sql.Selector)
 
 // Journey is the predicate function for journey builders.
 type Journey func(*sql.Selector)
@@ -15,8 +21,8 @@ type Journey func(*sql.Selector)
 // Organization is the predicate function for organization builders.
 type Organization func(*sql.Selector)
 
-// Project is the predicate function for project builders.
-type Project func(*sql.Selector)
+// Product is the predicate function for product builders.
+type Product func(*sql.Selector)
 
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)

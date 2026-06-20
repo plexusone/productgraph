@@ -22,7 +22,10 @@ func (Journey) Fields() []ent.Field {
 			Default(uuid.New).
 			Immutable(),
 		field.UUID("org_id", uuid.UUID{}), // RLS column
-		field.UUID("project_id", uuid.UUID{}),
+		field.UUID("product_id", uuid.UUID{}),
+		field.UUID("feature_id", uuid.UUID{}).
+			Optional().
+			Nillable(),
 		field.String("name").
 			NotEmpty().
 			MaxLen(255),
@@ -64,11 +67,15 @@ func (Journey) Fields() []ent.Field {
 // Edges of the Journey.
 func (Journey) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("project", Project.Type).
+		edge.From("product", Product.Type).
 			Ref("journeys").
-			Field("project_id").
+			Field("product_id").
 			Unique().
 			Required(),
+		edge.From("feature", Feature.Type).
+			Ref("journeys").
+			Field("feature_id").
+			Unique(),
 		edge.To("events", Event.Type),
 		edge.To("sessions", Session.Type),
 	}
@@ -77,8 +84,9 @@ func (Journey) Edges() []ent.Edge {
 // Indexes of the Journey.
 func (Journey) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("org_id", "project_id"),
+		index.Fields("org_id", "product_id"),
 		index.Fields("org_id", "is_active"),
-		index.Fields("project_id", "name").Unique(),
+		index.Fields("org_id", "feature_id"),
+		index.Fields("product_id", "name").Unique(),
 	}
 }

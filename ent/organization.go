@@ -34,20 +34,20 @@ type Organization struct {
 
 // OrganizationEdges holds the relations/edges for other nodes in the graph.
 type OrganizationEdges struct {
-	// Projects holds the value of the projects edge.
-	Projects []*Project `json:"projects,omitempty"`
+	// Products holds the value of the products edge.
+	Products []*Product `json:"products,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// ProjectsOrErr returns the Projects value or an error if the edge
+// ProductsOrErr returns the Products value or an error if the edge
 // was not loaded in eager-loading.
-func (e OrganizationEdges) ProjectsOrErr() ([]*Project, error) {
+func (e OrganizationEdges) ProductsOrErr() ([]*Product, error) {
 	if e.loadedTypes[0] {
-		return e.Projects, nil
+		return e.Products, nil
 	}
-	return nil, &NotLoadedError{edge: "projects"}
+	return nil, &NotLoadedError{edge: "products"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -119,9 +119,9 @@ func (_m *Organization) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryProjects queries the "projects" edge of the Organization entity.
-func (_m *Organization) QueryProjects() *ProjectQuery {
-	return NewOrganizationClient(_m.config).QueryProjects(_m)
+// QueryProducts queries the "products" edge of the Organization entity.
+func (_m *Organization) QueryProducts() *ProductQuery {
+	return NewOrganizationClient(_m.config).QueryProducts(_m)
 }
 
 // Update returns a builder for updating this Organization.

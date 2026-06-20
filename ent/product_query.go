@@ -13,22 +13,24 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/plexusone/productgraph/ent/capability"
 	"github.com/plexusone/productgraph/ent/event"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/organization"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
-// ProjectQuery is the builder for querying Project entities.
-type ProjectQuery struct {
+// ProductQuery is the builder for querying Product entities.
+type ProductQuery struct {
 	config
 	ctx              *QueryContext
-	order            []project.OrderOption
+	order            []product.OrderOption
 	inters           []Interceptor
-	predicates       []predicate.Project
+	predicates       []predicate.Product
 	withOrganization *OrganizationQuery
+	withCapabilities *CapabilityQuery
 	withEvents       *EventQuery
 	withSessions     *SessionQuery
 	withJourneys     *JourneyQuery
@@ -37,39 +39,39 @@ type ProjectQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the ProjectQuery builder.
-func (_q *ProjectQuery) Where(ps ...predicate.Project) *ProjectQuery {
+// Where adds a new predicate for the ProductQuery builder.
+func (_q *ProductQuery) Where(ps ...predicate.Product) *ProductQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *ProjectQuery) Limit(limit int) *ProjectQuery {
+func (_q *ProductQuery) Limit(limit int) *ProductQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *ProjectQuery) Offset(offset int) *ProjectQuery {
+func (_q *ProductQuery) Offset(offset int) *ProductQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *ProjectQuery) Unique(unique bool) *ProjectQuery {
+func (_q *ProductQuery) Unique(unique bool) *ProductQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *ProjectQuery) Order(o ...project.OrderOption) *ProjectQuery {
+func (_q *ProductQuery) Order(o ...product.OrderOption) *ProductQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
 // QueryOrganization chains the current query on the "organization" edge.
-func (_q *ProjectQuery) QueryOrganization() *OrganizationQuery {
+func (_q *ProductQuery) QueryOrganization() *OrganizationQuery {
 	query := (&OrganizationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -80,9 +82,31 @@ func (_q *ProjectQuery) QueryOrganization() *OrganizationQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(project.Table, project.FieldID, selector),
+			sqlgraph.From(product.Table, product.FieldID, selector),
 			sqlgraph.To(organization.Table, organization.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, project.OrganizationTable, project.OrganizationColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, product.OrganizationTable, product.OrganizationColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCapabilities chains the current query on the "capabilities" edge.
+func (_q *ProductQuery) QueryCapabilities() *CapabilityQuery {
+	query := (&CapabilityClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(capability.Table, capability.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.CapabilitiesTable, product.CapabilitiesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -91,7 +115,7 @@ func (_q *ProjectQuery) QueryOrganization() *OrganizationQuery {
 }
 
 // QueryEvents chains the current query on the "events" edge.
-func (_q *ProjectQuery) QueryEvents() *EventQuery {
+func (_q *ProductQuery) QueryEvents() *EventQuery {
 	query := (&EventClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -102,9 +126,9 @@ func (_q *ProjectQuery) QueryEvents() *EventQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(project.Table, project.FieldID, selector),
+			sqlgraph.From(product.Table, product.FieldID, selector),
 			sqlgraph.To(event.Table, event.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, project.EventsTable, project.EventsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.EventsTable, product.EventsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -113,7 +137,7 @@ func (_q *ProjectQuery) QueryEvents() *EventQuery {
 }
 
 // QuerySessions chains the current query on the "sessions" edge.
-func (_q *ProjectQuery) QuerySessions() *SessionQuery {
+func (_q *ProductQuery) QuerySessions() *SessionQuery {
 	query := (&SessionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -124,9 +148,9 @@ func (_q *ProjectQuery) QuerySessions() *SessionQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(project.Table, project.FieldID, selector),
+			sqlgraph.From(product.Table, product.FieldID, selector),
 			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, project.SessionsTable, project.SessionsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.SessionsTable, product.SessionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -135,7 +159,7 @@ func (_q *ProjectQuery) QuerySessions() *SessionQuery {
 }
 
 // QueryJourneys chains the current query on the "journeys" edge.
-func (_q *ProjectQuery) QueryJourneys() *JourneyQuery {
+func (_q *ProductQuery) QueryJourneys() *JourneyQuery {
 	query := (&JourneyClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -146,9 +170,9 @@ func (_q *ProjectQuery) QueryJourneys() *JourneyQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(project.Table, project.FieldID, selector),
+			sqlgraph.From(product.Table, product.FieldID, selector),
 			sqlgraph.To(journey.Table, journey.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, project.JourneysTable, project.JourneysColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.JourneysTable, product.JourneysColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -156,21 +180,21 @@ func (_q *ProjectQuery) QueryJourneys() *JourneyQuery {
 	return query
 }
 
-// First returns the first Project entity from the query.
-// Returns a *NotFoundError when no Project was found.
-func (_q *ProjectQuery) First(ctx context.Context) (*Project, error) {
+// First returns the first Product entity from the query.
+// Returns a *NotFoundError when no Product was found.
+func (_q *ProductQuery) First(ctx context.Context) (*Product, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{project.Label}
+		return nil, &NotFoundError{product.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *ProjectQuery) FirstX(ctx context.Context) *Project {
+func (_q *ProductQuery) FirstX(ctx context.Context) *Product {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -178,22 +202,22 @@ func (_q *ProjectQuery) FirstX(ctx context.Context) *Project {
 	return node
 }
 
-// FirstID returns the first Project ID from the query.
-// Returns a *NotFoundError when no Project ID was found.
-func (_q *ProjectQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+// FirstID returns the first Product ID from the query.
+// Returns a *NotFoundError when no Product ID was found.
+func (_q *ProductQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{project.Label}
+		err = &NotFoundError{product.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *ProjectQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (_q *ProductQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -201,10 +225,10 @@ func (_q *ProjectQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// Only returns a single Project entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Project entity is found.
-// Returns a *NotFoundError when no Project entities are found.
-func (_q *ProjectQuery) Only(ctx context.Context) (*Project, error) {
+// Only returns a single Product entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Product entity is found.
+// Returns a *NotFoundError when no Product entities are found.
+func (_q *ProductQuery) Only(ctx context.Context) (*Product, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -213,14 +237,14 @@ func (_q *ProjectQuery) Only(ctx context.Context) (*Project, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{project.Label}
+		return nil, &NotFoundError{product.Label}
 	default:
-		return nil, &NotSingularError{project.Label}
+		return nil, &NotSingularError{product.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *ProjectQuery) OnlyX(ctx context.Context) *Project {
+func (_q *ProductQuery) OnlyX(ctx context.Context) *Product {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -228,10 +252,10 @@ func (_q *ProjectQuery) OnlyX(ctx context.Context) *Project {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Project ID in the query.
-// Returns a *NotSingularError when more than one Project ID is found.
+// OnlyID is like Only, but returns the only Product ID in the query.
+// Returns a *NotSingularError when more than one Product ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *ProjectQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+func (_q *ProductQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -240,15 +264,15 @@ func (_q *ProjectQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{project.Label}
+		err = &NotFoundError{product.Label}
 	default:
-		err = &NotSingularError{project.Label}
+		err = &NotSingularError{product.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *ProjectQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (_q *ProductQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -256,18 +280,18 @@ func (_q *ProjectQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// All executes the query and returns a list of Projects.
-func (_q *ProjectQuery) All(ctx context.Context) ([]*Project, error) {
+// All executes the query and returns a list of Products.
+func (_q *ProductQuery) All(ctx context.Context) ([]*Product, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Project, *ProjectQuery]()
-	return withInterceptors[[]*Project](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Product, *ProductQuery]()
+	return withInterceptors[[]*Product](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *ProjectQuery) AllX(ctx context.Context) []*Project {
+func (_q *ProductQuery) AllX(ctx context.Context) []*Product {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -275,20 +299,20 @@ func (_q *ProjectQuery) AllX(ctx context.Context) []*Project {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Project IDs.
-func (_q *ProjectQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+// IDs executes the query and returns a list of Product IDs.
+func (_q *ProductQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(project.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(product.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *ProjectQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (_q *ProductQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -297,16 +321,16 @@ func (_q *ProjectQuery) IDsX(ctx context.Context) []uuid.UUID {
 }
 
 // Count returns the count of the given query.
-func (_q *ProjectQuery) Count(ctx context.Context) (int, error) {
+func (_q *ProductQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*ProjectQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*ProductQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *ProjectQuery) CountX(ctx context.Context) int {
+func (_q *ProductQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -315,7 +339,7 @@ func (_q *ProjectQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *ProjectQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *ProductQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -328,7 +352,7 @@ func (_q *ProjectQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *ProjectQuery) ExistX(ctx context.Context) bool {
+func (_q *ProductQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -336,19 +360,20 @@ func (_q *ProjectQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the ProjectQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the ProductQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *ProjectQuery) Clone() *ProjectQuery {
+func (_q *ProductQuery) Clone() *ProductQuery {
 	if _q == nil {
 		return nil
 	}
-	return &ProjectQuery{
+	return &ProductQuery{
 		config:           _q.config,
 		ctx:              _q.ctx.Clone(),
-		order:            append([]project.OrderOption{}, _q.order...),
+		order:            append([]product.OrderOption{}, _q.order...),
 		inters:           append([]Interceptor{}, _q.inters...),
-		predicates:       append([]predicate.Project{}, _q.predicates...),
+		predicates:       append([]predicate.Product{}, _q.predicates...),
 		withOrganization: _q.withOrganization.Clone(),
+		withCapabilities: _q.withCapabilities.Clone(),
 		withEvents:       _q.withEvents.Clone(),
 		withSessions:     _q.withSessions.Clone(),
 		withJourneys:     _q.withJourneys.Clone(),
@@ -360,7 +385,7 @@ func (_q *ProjectQuery) Clone() *ProjectQuery {
 
 // WithOrganization tells the query-builder to eager-load the nodes that are connected to
 // the "organization" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ProjectQuery) WithOrganization(opts ...func(*OrganizationQuery)) *ProjectQuery {
+func (_q *ProductQuery) WithOrganization(opts ...func(*OrganizationQuery)) *ProductQuery {
 	query := (&OrganizationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
@@ -369,9 +394,20 @@ func (_q *ProjectQuery) WithOrganization(opts ...func(*OrganizationQuery)) *Proj
 	return _q
 }
 
+// WithCapabilities tells the query-builder to eager-load the nodes that are connected to
+// the "capabilities" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ProductQuery) WithCapabilities(opts ...func(*CapabilityQuery)) *ProductQuery {
+	query := (&CapabilityClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCapabilities = query
+	return _q
+}
+
 // WithEvents tells the query-builder to eager-load the nodes that are connected to
 // the "events" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ProjectQuery) WithEvents(opts ...func(*EventQuery)) *ProjectQuery {
+func (_q *ProductQuery) WithEvents(opts ...func(*EventQuery)) *ProductQuery {
 	query := (&EventClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
@@ -382,7 +418,7 @@ func (_q *ProjectQuery) WithEvents(opts ...func(*EventQuery)) *ProjectQuery {
 
 // WithSessions tells the query-builder to eager-load the nodes that are connected to
 // the "sessions" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ProjectQuery) WithSessions(opts ...func(*SessionQuery)) *ProjectQuery {
+func (_q *ProductQuery) WithSessions(opts ...func(*SessionQuery)) *ProductQuery {
 	query := (&SessionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
@@ -393,7 +429,7 @@ func (_q *ProjectQuery) WithSessions(opts ...func(*SessionQuery)) *ProjectQuery 
 
 // WithJourneys tells the query-builder to eager-load the nodes that are connected to
 // the "journeys" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ProjectQuery) WithJourneys(opts ...func(*JourneyQuery)) *ProjectQuery {
+func (_q *ProductQuery) WithJourneys(opts ...func(*JourneyQuery)) *ProductQuery {
 	query := (&JourneyClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
@@ -412,15 +448,15 @@ func (_q *ProjectQuery) WithJourneys(opts ...func(*JourneyQuery)) *ProjectQuery 
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Project.Query().
-//		GroupBy(project.FieldOrgID).
+//	client.Product.Query().
+//		GroupBy(product.FieldOrgID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *ProjectQuery) GroupBy(field string, fields ...string) *ProjectGroupBy {
+func (_q *ProductQuery) GroupBy(field string, fields ...string) *ProductGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &ProjectGroupBy{build: _q}
+	grbuild := &ProductGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = project.Label
+	grbuild.label = product.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -434,23 +470,23 @@ func (_q *ProjectQuery) GroupBy(field string, fields ...string) *ProjectGroupBy 
 //		OrgID uuid.UUID `json:"org_id,omitempty"`
 //	}
 //
-//	client.Project.Query().
-//		Select(project.FieldOrgID).
+//	client.Product.Query().
+//		Select(product.FieldOrgID).
 //		Scan(ctx, &v)
-func (_q *ProjectQuery) Select(fields ...string) *ProjectSelect {
+func (_q *ProductQuery) Select(fields ...string) *ProductSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &ProjectSelect{ProjectQuery: _q}
-	sbuild.label = project.Label
+	sbuild := &ProductSelect{ProductQuery: _q}
+	sbuild.label = product.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a ProjectSelect configured with the given aggregations.
-func (_q *ProjectQuery) Aggregate(fns ...AggregateFunc) *ProjectSelect {
+// Aggregate returns a ProductSelect configured with the given aggregations.
+func (_q *ProductQuery) Aggregate(fns ...AggregateFunc) *ProductSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *ProjectQuery) prepareQuery(ctx context.Context) error {
+func (_q *ProductQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -462,7 +498,7 @@ func (_q *ProjectQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !project.ValidColumn(f) {
+		if !product.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -476,22 +512,23 @@ func (_q *ProjectQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *ProjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Project, error) {
+func (_q *ProductQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Product, error) {
 	var (
-		nodes       = []*Project{}
+		nodes       = []*Product{}
 		_spec       = _q.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			_q.withOrganization != nil,
+			_q.withCapabilities != nil,
 			_q.withEvents != nil,
 			_q.withSessions != nil,
 			_q.withJourneys != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Project).scanValues(nil, columns)
+		return (*Product).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Project{config: _q.config}
+		node := &Product{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -507,37 +544,44 @@ func (_q *ProjectQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Proj
 	}
 	if query := _q.withOrganization; query != nil {
 		if err := _q.loadOrganization(ctx, query, nodes, nil,
-			func(n *Project, e *Organization) { n.Edges.Organization = e }); err != nil {
+			func(n *Product, e *Organization) { n.Edges.Organization = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCapabilities; query != nil {
+		if err := _q.loadCapabilities(ctx, query, nodes,
+			func(n *Product) { n.Edges.Capabilities = []*Capability{} },
+			func(n *Product, e *Capability) { n.Edges.Capabilities = append(n.Edges.Capabilities, e) }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withEvents; query != nil {
 		if err := _q.loadEvents(ctx, query, nodes,
-			func(n *Project) { n.Edges.Events = []*Event{} },
-			func(n *Project, e *Event) { n.Edges.Events = append(n.Edges.Events, e) }); err != nil {
+			func(n *Product) { n.Edges.Events = []*Event{} },
+			func(n *Product, e *Event) { n.Edges.Events = append(n.Edges.Events, e) }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withSessions; query != nil {
 		if err := _q.loadSessions(ctx, query, nodes,
-			func(n *Project) { n.Edges.Sessions = []*Session{} },
-			func(n *Project, e *Session) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
+			func(n *Product) { n.Edges.Sessions = []*Session{} },
+			func(n *Product, e *Session) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withJourneys; query != nil {
 		if err := _q.loadJourneys(ctx, query, nodes,
-			func(n *Project) { n.Edges.Journeys = []*Journey{} },
-			func(n *Project, e *Journey) { n.Edges.Journeys = append(n.Edges.Journeys, e) }); err != nil {
+			func(n *Product) { n.Edges.Journeys = []*Journey{} },
+			func(n *Product, e *Journey) { n.Edges.Journeys = append(n.Edges.Journeys, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *ProjectQuery) loadOrganization(ctx context.Context, query *OrganizationQuery, nodes []*Project, init func(*Project), assign func(*Project, *Organization)) error {
+func (_q *ProductQuery) loadOrganization(ctx context.Context, query *OrganizationQuery, nodes []*Product, init func(*Product), assign func(*Product, *Organization)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Project)
+	nodeids := make(map[uuid.UUID][]*Product)
 	for i := range nodes {
 		fk := nodes[i].OrgID
 		if _, ok := nodeids[fk]; !ok {
@@ -564,9 +608,9 @@ func (_q *ProjectQuery) loadOrganization(ctx context.Context, query *Organizatio
 	}
 	return nil
 }
-func (_q *ProjectQuery) loadEvents(ctx context.Context, query *EventQuery, nodes []*Project, init func(*Project), assign func(*Project, *Event)) error {
+func (_q *ProductQuery) loadCapabilities(ctx context.Context, query *CapabilityQuery, nodes []*Product, init func(*Product), assign func(*Product, *Capability)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Project)
+	nodeids := make(map[uuid.UUID]*Product)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -575,28 +619,58 @@ func (_q *ProjectQuery) loadEvents(ctx context.Context, query *EventQuery, nodes
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(event.FieldProjectID)
+		query.ctx.AppendFieldOnce(capability.FieldProductID)
+	}
+	query.Where(predicate.Capability(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(product.CapabilitiesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ProductID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "product_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *ProductQuery) loadEvents(ctx context.Context, query *EventQuery, nodes []*Product, init func(*Product), assign func(*Product, *Event)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Product)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(event.FieldProductID)
 	}
 	query.Where(predicate.Event(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(project.EventsColumn), fks...))
+		s.Where(sql.InValues(s.C(product.EventsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.ProjectID
+		fk := n.ProductID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "project_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "product_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
-func (_q *ProjectQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*Project, init func(*Project), assign func(*Project, *Session)) error {
+func (_q *ProductQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*Product, init func(*Product), assign func(*Product, *Session)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Project)
+	nodeids := make(map[uuid.UUID]*Product)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -605,28 +679,28 @@ func (_q *ProjectQuery) loadSessions(ctx context.Context, query *SessionQuery, n
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(session.FieldProjectID)
+		query.ctx.AppendFieldOnce(session.FieldProductID)
 	}
 	query.Where(predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(project.SessionsColumn), fks...))
+		s.Where(sql.InValues(s.C(product.SessionsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.ProjectID
+		fk := n.ProductID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "project_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "product_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
-func (_q *ProjectQuery) loadJourneys(ctx context.Context, query *JourneyQuery, nodes []*Project, init func(*Project), assign func(*Project, *Journey)) error {
+func (_q *ProductQuery) loadJourneys(ctx context.Context, query *JourneyQuery, nodes []*Product, init func(*Product), assign func(*Product, *Journey)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Project)
+	nodeids := make(map[uuid.UUID]*Product)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -635,27 +709,27 @@ func (_q *ProjectQuery) loadJourneys(ctx context.Context, query *JourneyQuery, n
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(journey.FieldProjectID)
+		query.ctx.AppendFieldOnce(journey.FieldProductID)
 	}
 	query.Where(predicate.Journey(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(project.JourneysColumn), fks...))
+		s.Where(sql.InValues(s.C(product.JourneysColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.ProjectID
+		fk := n.ProductID
 		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "project_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "product_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
 
-func (_q *ProjectQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *ProductQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -664,8 +738,8 @@ func (_q *ProjectQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *ProjectQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(project.Table, project.Columns, sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID))
+func (_q *ProductQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(product.Table, product.Columns, sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -674,14 +748,14 @@ func (_q *ProjectQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, project.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, product.FieldID)
 		for i := range fields {
-			if fields[i] != project.FieldID {
+			if fields[i] != product.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
 		if _q.withOrganization != nil {
-			_spec.Node.AddColumnOnce(project.FieldOrgID)
+			_spec.Node.AddColumnOnce(product.FieldOrgID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -707,12 +781,12 @@ func (_q *ProjectQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *ProjectQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *ProductQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(project.Table)
+	t1 := builder.Table(product.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = project.Columns
+		columns = product.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -739,28 +813,28 @@ func (_q *ProjectQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// ProjectGroupBy is the group-by builder for Project entities.
-type ProjectGroupBy struct {
+// ProductGroupBy is the group-by builder for Product entities.
+type ProductGroupBy struct {
 	selector
-	build *ProjectQuery
+	build *ProductQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *ProjectGroupBy) Aggregate(fns ...AggregateFunc) *ProjectGroupBy {
+func (_g *ProductGroupBy) Aggregate(fns ...AggregateFunc) *ProductGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *ProjectGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *ProductGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ProjectQuery, *ProjectGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*ProductQuery, *ProductGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *ProjectGroupBy) sqlScan(ctx context.Context, root *ProjectQuery, v any) error {
+func (_g *ProductGroupBy) sqlScan(ctx context.Context, root *ProductQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -787,28 +861,28 @@ func (_g *ProjectGroupBy) sqlScan(ctx context.Context, root *ProjectQuery, v any
 	return sql.ScanSlice(rows, v)
 }
 
-// ProjectSelect is the builder for selecting fields of Project entities.
-type ProjectSelect struct {
-	*ProjectQuery
+// ProductSelect is the builder for selecting fields of Product entities.
+type ProductSelect struct {
+	*ProductQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *ProjectSelect) Aggregate(fns ...AggregateFunc) *ProjectSelect {
+func (_s *ProductSelect) Aggregate(fns ...AggregateFunc) *ProductSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *ProjectSelect) Scan(ctx context.Context, v any) error {
+func (_s *ProductSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ProjectQuery, *ProjectSelect](ctx, _s.ProjectQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*ProductQuery, *ProductSelect](ctx, _s.ProductQuery, _s, _s.inters, v)
 }
 
-func (_s *ProjectSelect) sqlScan(ctx context.Context, root *ProjectQuery, v any) error {
+func (_s *ProductSelect) sqlScan(ctx context.Context, root *ProductQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

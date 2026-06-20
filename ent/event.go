@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/event"
 	"github.com/plexusone/productgraph/ent/journey"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 )
 
 // Event is the model entity for the Event schema.
@@ -23,8 +23,8 @@ type Event struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// OrgID holds the value of the "org_id" field.
 	OrgID uuid.UUID `json:"org_id,omitempty"`
-	// ProjectID holds the value of the "project_id" field.
-	ProjectID uuid.UUID `json:"project_id,omitempty"`
+	// ProductID holds the value of the "product_id" field.
+	ProductID uuid.UUID `json:"product_id,omitempty"`
 	// EventID holds the value of the "event_id" field.
 	EventID string `json:"event_id,omitempty"`
 	// SessionID holds the value of the "session_id" field.
@@ -121,8 +121,8 @@ type Event struct {
 
 // EventEdges holds the relations/edges for other nodes in the graph.
 type EventEdges struct {
-	// Project holds the value of the project edge.
-	Project *Project `json:"project,omitempty"`
+	// Product holds the value of the product edge.
+	Product *Product `json:"product,omitempty"`
 	// Journey holds the value of the journey edge.
 	Journey *Journey `json:"journey,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -130,15 +130,15 @@ type EventEdges struct {
 	loadedTypes [2]bool
 }
 
-// ProjectOrErr returns the Project value or an error if the edge
+// ProductOrErr returns the Product value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e EventEdges) ProjectOrErr() (*Project, error) {
-	if e.Project != nil {
-		return e.Project, nil
+func (e EventEdges) ProductOrErr() (*Product, error) {
+	if e.Product != nil {
+		return e.Product, nil
 	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: project.Label}
+		return nil, &NotFoundError{label: product.Label}
 	}
-	return nil, &NotLoadedError{edge: "project"}
+	return nil, &NotLoadedError{edge: "product"}
 }
 
 // JourneyOrErr returns the Journey value or an error if the edge
@@ -169,7 +169,7 @@ func (*Event) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case event.FieldTimestamp, event.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case event.FieldID, event.FieldOrgID, event.FieldProjectID:
+		case event.FieldID, event.FieldOrgID, event.FieldProductID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -198,11 +198,11 @@ func (_m *Event) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.OrgID = *value
 			}
-		case event.FieldProjectID:
+		case event.FieldProductID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field project_id", values[i])
+				return fmt.Errorf("unexpected type %T for field product_id", values[i])
 			} else if value != nil {
-				_m.ProjectID = *value
+				_m.ProductID = *value
 			}
 		case event.FieldEventID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -484,9 +484,9 @@ func (_m *Event) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryProject queries the "project" edge of the Event entity.
-func (_m *Event) QueryProject() *ProjectQuery {
-	return NewEventClient(_m.config).QueryProject(_m)
+// QueryProduct queries the "product" edge of the Event entity.
+func (_m *Event) QueryProduct() *ProductQuery {
+	return NewEventClient(_m.config).QueryProduct(_m)
 }
 
 // QueryJourney queries the "journey" edge of the Event entity.
@@ -520,8 +520,8 @@ func (_m *Event) String() string {
 	builder.WriteString("org_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrgID))
 	builder.WriteString(", ")
-	builder.WriteString("project_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ProjectID))
+	builder.WriteString("product_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProductID))
 	builder.WriteString(", ")
 	builder.WriteString("event_id=")
 	builder.WriteString(_m.EventID)

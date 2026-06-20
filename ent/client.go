@@ -16,10 +16,12 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/plexusone/productgraph/ent/capability"
 	"github.com/plexusone/productgraph/ent/event"
+	"github.com/plexusone/productgraph/ent/feature"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/organization"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
@@ -28,14 +30,18 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Capability is the client for interacting with the Capability builders.
+	Capability *CapabilityClient
 	// Event is the client for interacting with the Event builders.
 	Event *EventClient
+	// Feature is the client for interacting with the Feature builders.
+	Feature *FeatureClient
 	// Journey is the client for interacting with the Journey builders.
 	Journey *JourneyClient
 	// Organization is the client for interacting with the Organization builders.
 	Organization *OrganizationClient
-	// Project is the client for interacting with the Project builders.
-	Project *ProjectClient
+	// Product is the client for interacting with the Product builders.
+	Product *ProductClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 }
@@ -49,10 +55,12 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Capability = NewCapabilityClient(c.config)
 	c.Event = NewEventClient(c.config)
+	c.Feature = NewFeatureClient(c.config)
 	c.Journey = NewJourneyClient(c.config)
 	c.Organization = NewOrganizationClient(c.config)
-	c.Project = NewProjectClient(c.config)
+	c.Product = NewProductClient(c.config)
 	c.Session = NewSessionClient(c.config)
 }
 
@@ -146,10 +154,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:          ctx,
 		config:       cfg,
+		Capability:   NewCapabilityClient(cfg),
 		Event:        NewEventClient(cfg),
+		Feature:      NewFeatureClient(cfg),
 		Journey:      NewJourneyClient(cfg),
 		Organization: NewOrganizationClient(cfg),
-		Project:      NewProjectClient(cfg),
+		Product:      NewProductClient(cfg),
 		Session:      NewSessionClient(cfg),
 	}, nil
 }
@@ -170,10 +180,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:          ctx,
 		config:       cfg,
+		Capability:   NewCapabilityClient(cfg),
 		Event:        NewEventClient(cfg),
+		Feature:      NewFeatureClient(cfg),
 		Journey:      NewJourneyClient(cfg),
 		Organization: NewOrganizationClient(cfg),
-		Project:      NewProjectClient(cfg),
+		Product:      NewProductClient(cfg),
 		Session:      NewSessionClient(cfg),
 	}, nil
 }
@@ -181,7 +193,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Event.
+//		Capability.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -203,38 +215,209 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Event.Use(hooks...)
-	c.Journey.Use(hooks...)
-	c.Organization.Use(hooks...)
-	c.Project.Use(hooks...)
-	c.Session.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Capability, c.Event, c.Feature, c.Journey, c.Organization, c.Product,
+		c.Session,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Event.Intercept(interceptors...)
-	c.Journey.Intercept(interceptors...)
-	c.Organization.Intercept(interceptors...)
-	c.Project.Intercept(interceptors...)
-	c.Session.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Capability, c.Event, c.Feature, c.Journey, c.Organization, c.Product,
+		c.Session,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *CapabilityMutation:
+		return c.Capability.mutate(ctx, m)
 	case *EventMutation:
 		return c.Event.mutate(ctx, m)
+	case *FeatureMutation:
+		return c.Feature.mutate(ctx, m)
 	case *JourneyMutation:
 		return c.Journey.mutate(ctx, m)
 	case *OrganizationMutation:
 		return c.Organization.mutate(ctx, m)
-	case *ProjectMutation:
-		return c.Project.mutate(ctx, m)
+	case *ProductMutation:
+		return c.Product.mutate(ctx, m)
 	case *SessionMutation:
 		return c.Session.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// CapabilityClient is a client for the Capability schema.
+type CapabilityClient struct {
+	config
+}
+
+// NewCapabilityClient returns a client for the Capability from the given config.
+func NewCapabilityClient(c config) *CapabilityClient {
+	return &CapabilityClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `capability.Hooks(f(g(h())))`.
+func (c *CapabilityClient) Use(hooks ...Hook) {
+	c.hooks.Capability = append(c.hooks.Capability, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `capability.Intercept(f(g(h())))`.
+func (c *CapabilityClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Capability = append(c.inters.Capability, interceptors...)
+}
+
+// Create returns a builder for creating a Capability entity.
+func (c *CapabilityClient) Create() *CapabilityCreate {
+	mutation := newCapabilityMutation(c.config, OpCreate)
+	return &CapabilityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Capability entities.
+func (c *CapabilityClient) CreateBulk(builders ...*CapabilityCreate) *CapabilityCreateBulk {
+	return &CapabilityCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CapabilityClient) MapCreateBulk(slice any, setFunc func(*CapabilityCreate, int)) *CapabilityCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CapabilityCreateBulk{err: fmt.Errorf("calling to CapabilityClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CapabilityCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CapabilityCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Capability.
+func (c *CapabilityClient) Update() *CapabilityUpdate {
+	mutation := newCapabilityMutation(c.config, OpUpdate)
+	return &CapabilityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CapabilityClient) UpdateOne(_m *Capability) *CapabilityUpdateOne {
+	mutation := newCapabilityMutation(c.config, OpUpdateOne, withCapability(_m))
+	return &CapabilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CapabilityClient) UpdateOneID(id uuid.UUID) *CapabilityUpdateOne {
+	mutation := newCapabilityMutation(c.config, OpUpdateOne, withCapabilityID(id))
+	return &CapabilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Capability.
+func (c *CapabilityClient) Delete() *CapabilityDelete {
+	mutation := newCapabilityMutation(c.config, OpDelete)
+	return &CapabilityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CapabilityClient) DeleteOne(_m *Capability) *CapabilityDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CapabilityClient) DeleteOneID(id uuid.UUID) *CapabilityDeleteOne {
+	builder := c.Delete().Where(capability.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CapabilityDeleteOne{builder}
+}
+
+// Query returns a query builder for Capability.
+func (c *CapabilityClient) Query() *CapabilityQuery {
+	return &CapabilityQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCapability},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Capability entity by its id.
+func (c *CapabilityClient) Get(ctx context.Context, id uuid.UUID) (*Capability, error) {
+	return c.Query().Where(capability.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CapabilityClient) GetX(ctx context.Context, id uuid.UUID) *Capability {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProduct queries the product edge of a Capability.
+func (c *CapabilityClient) QueryProduct(_m *Capability) *ProductQuery {
+	query := (&ProductClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(capability.Table, capability.FieldID, id),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, capability.ProductTable, capability.ProductColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFeatures queries the features edge of a Capability.
+func (c *CapabilityClient) QueryFeatures(_m *Capability) *FeatureQuery {
+	query := (&FeatureClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(capability.Table, capability.FieldID, id),
+			sqlgraph.To(feature.Table, feature.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, capability.FeaturesTable, capability.FeaturesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CapabilityClient) Hooks() []Hook {
+	return c.hooks.Capability
+}
+
+// Interceptors returns the client interceptors.
+func (c *CapabilityClient) Interceptors() []Interceptor {
+	return c.inters.Capability
+}
+
+func (c *CapabilityClient) mutate(ctx context.Context, m *CapabilityMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CapabilityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CapabilityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CapabilityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CapabilityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Capability mutation op: %q", m.Op())
 	}
 }
 
@@ -346,15 +529,15 @@ func (c *EventClient) GetX(ctx context.Context, id uuid.UUID) *Event {
 	return obj
 }
 
-// QueryProject queries the project edge of a Event.
-func (c *EventClient) QueryProject(_m *Event) *ProjectQuery {
-	query := (&ProjectClient{config: c.config}).Query()
+// QueryProduct queries the product edge of a Event.
+func (c *EventClient) QueryProduct(_m *Event) *ProductQuery {
+	query := (&ProductClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(event.Table, event.FieldID, id),
-			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, event.ProjectTable, event.ProjectColumn),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, event.ProductTable, event.ProductColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -400,6 +583,171 @@ func (c *EventClient) mutate(ctx context.Context, m *EventMutation) (Value, erro
 		return (&EventDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Event mutation op: %q", m.Op())
+	}
+}
+
+// FeatureClient is a client for the Feature schema.
+type FeatureClient struct {
+	config
+}
+
+// NewFeatureClient returns a client for the Feature from the given config.
+func NewFeatureClient(c config) *FeatureClient {
+	return &FeatureClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `feature.Hooks(f(g(h())))`.
+func (c *FeatureClient) Use(hooks ...Hook) {
+	c.hooks.Feature = append(c.hooks.Feature, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `feature.Intercept(f(g(h())))`.
+func (c *FeatureClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Feature = append(c.inters.Feature, interceptors...)
+}
+
+// Create returns a builder for creating a Feature entity.
+func (c *FeatureClient) Create() *FeatureCreate {
+	mutation := newFeatureMutation(c.config, OpCreate)
+	return &FeatureCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Feature entities.
+func (c *FeatureClient) CreateBulk(builders ...*FeatureCreate) *FeatureCreateBulk {
+	return &FeatureCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FeatureClient) MapCreateBulk(slice any, setFunc func(*FeatureCreate, int)) *FeatureCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FeatureCreateBulk{err: fmt.Errorf("calling to FeatureClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FeatureCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FeatureCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Feature.
+func (c *FeatureClient) Update() *FeatureUpdate {
+	mutation := newFeatureMutation(c.config, OpUpdate)
+	return &FeatureUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FeatureClient) UpdateOne(_m *Feature) *FeatureUpdateOne {
+	mutation := newFeatureMutation(c.config, OpUpdateOne, withFeature(_m))
+	return &FeatureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FeatureClient) UpdateOneID(id uuid.UUID) *FeatureUpdateOne {
+	mutation := newFeatureMutation(c.config, OpUpdateOne, withFeatureID(id))
+	return &FeatureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Feature.
+func (c *FeatureClient) Delete() *FeatureDelete {
+	mutation := newFeatureMutation(c.config, OpDelete)
+	return &FeatureDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FeatureClient) DeleteOne(_m *Feature) *FeatureDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FeatureClient) DeleteOneID(id uuid.UUID) *FeatureDeleteOne {
+	builder := c.Delete().Where(feature.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FeatureDeleteOne{builder}
+}
+
+// Query returns a query builder for Feature.
+func (c *FeatureClient) Query() *FeatureQuery {
+	return &FeatureQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFeature},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Feature entity by its id.
+func (c *FeatureClient) Get(ctx context.Context, id uuid.UUID) (*Feature, error) {
+	return c.Query().Where(feature.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FeatureClient) GetX(ctx context.Context, id uuid.UUID) *Feature {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCapability queries the capability edge of a Feature.
+func (c *FeatureClient) QueryCapability(_m *Feature) *CapabilityQuery {
+	query := (&CapabilityClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(feature.Table, feature.FieldID, id),
+			sqlgraph.To(capability.Table, capability.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, feature.CapabilityTable, feature.CapabilityColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryJourneys queries the journeys edge of a Feature.
+func (c *FeatureClient) QueryJourneys(_m *Feature) *JourneyQuery {
+	query := (&JourneyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(feature.Table, feature.FieldID, id),
+			sqlgraph.To(journey.Table, journey.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, feature.JourneysTable, feature.JourneysColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FeatureClient) Hooks() []Hook {
+	return c.hooks.Feature
+}
+
+// Interceptors returns the client interceptors.
+func (c *FeatureClient) Interceptors() []Interceptor {
+	return c.inters.Feature
+}
+
+func (c *FeatureClient) mutate(ctx context.Context, m *FeatureMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FeatureCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FeatureUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FeatureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FeatureDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Feature mutation op: %q", m.Op())
 	}
 }
 
@@ -511,15 +859,31 @@ func (c *JourneyClient) GetX(ctx context.Context, id uuid.UUID) *Journey {
 	return obj
 }
 
-// QueryProject queries the project edge of a Journey.
-func (c *JourneyClient) QueryProject(_m *Journey) *ProjectQuery {
-	query := (&ProjectClient{config: c.config}).Query()
+// QueryProduct queries the product edge of a Journey.
+func (c *JourneyClient) QueryProduct(_m *Journey) *ProductQuery {
+	query := (&ProductClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(journey.Table, journey.FieldID, id),
-			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, journey.ProjectTable, journey.ProjectColumn),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, journey.ProductTable, journey.ProductColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFeature queries the feature edge of a Journey.
+func (c *JourneyClient) QueryFeature(_m *Journey) *FeatureQuery {
+	query := (&FeatureClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(journey.Table, journey.FieldID, id),
+			sqlgraph.To(feature.Table, feature.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, journey.FeatureTable, journey.FeatureColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -692,15 +1056,15 @@ func (c *OrganizationClient) GetX(ctx context.Context, id uuid.UUID) *Organizati
 	return obj
 }
 
-// QueryProjects queries the projects edge of a Organization.
-func (c *OrganizationClient) QueryProjects(_m *Organization) *ProjectQuery {
-	query := (&ProjectClient{config: c.config}).Query()
+// QueryProducts queries the products edge of a Organization.
+func (c *OrganizationClient) QueryProducts(_m *Organization) *ProductQuery {
+	query := (&ProductClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(organization.Table, organization.FieldID, id),
-			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, organization.ProjectsTable, organization.ProjectsColumn),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, organization.ProductsTable, organization.ProductsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -733,107 +1097,107 @@ func (c *OrganizationClient) mutate(ctx context.Context, m *OrganizationMutation
 	}
 }
 
-// ProjectClient is a client for the Project schema.
-type ProjectClient struct {
+// ProductClient is a client for the Product schema.
+type ProductClient struct {
 	config
 }
 
-// NewProjectClient returns a client for the Project from the given config.
-func NewProjectClient(c config) *ProjectClient {
-	return &ProjectClient{config: c}
+// NewProductClient returns a client for the Product from the given config.
+func NewProductClient(c config) *ProductClient {
+	return &ProductClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `project.Hooks(f(g(h())))`.
-func (c *ProjectClient) Use(hooks ...Hook) {
-	c.hooks.Project = append(c.hooks.Project, hooks...)
+// A call to `Use(f, g, h)` equals to `product.Hooks(f(g(h())))`.
+func (c *ProductClient) Use(hooks ...Hook) {
+	c.hooks.Product = append(c.hooks.Product, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `project.Intercept(f(g(h())))`.
-func (c *ProjectClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Project = append(c.inters.Project, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `product.Intercept(f(g(h())))`.
+func (c *ProductClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Product = append(c.inters.Product, interceptors...)
 }
 
-// Create returns a builder for creating a Project entity.
-func (c *ProjectClient) Create() *ProjectCreate {
-	mutation := newProjectMutation(c.config, OpCreate)
-	return &ProjectCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Product entity.
+func (c *ProductClient) Create() *ProductCreate {
+	mutation := newProductMutation(c.config, OpCreate)
+	return &ProductCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Project entities.
-func (c *ProjectClient) CreateBulk(builders ...*ProjectCreate) *ProjectCreateBulk {
-	return &ProjectCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Product entities.
+func (c *ProductClient) CreateBulk(builders ...*ProductCreate) *ProductCreateBulk {
+	return &ProductCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *ProjectClient) MapCreateBulk(slice any, setFunc func(*ProjectCreate, int)) *ProjectCreateBulk {
+func (c *ProductClient) MapCreateBulk(slice any, setFunc func(*ProductCreate, int)) *ProductCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &ProjectCreateBulk{err: fmt.Errorf("calling to ProjectClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &ProductCreateBulk{err: fmt.Errorf("calling to ProductClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*ProjectCreate, rv.Len())
+	builders := make([]*ProductCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &ProjectCreateBulk{config: c.config, builders: builders}
+	return &ProductCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Project.
-func (c *ProjectClient) Update() *ProjectUpdate {
-	mutation := newProjectMutation(c.config, OpUpdate)
-	return &ProjectUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Product.
+func (c *ProductClient) Update() *ProductUpdate {
+	mutation := newProductMutation(c.config, OpUpdate)
+	return &ProductUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *ProjectClient) UpdateOne(_m *Project) *ProjectUpdateOne {
-	mutation := newProjectMutation(c.config, OpUpdateOne, withProject(_m))
-	return &ProjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *ProductClient) UpdateOne(_m *Product) *ProductUpdateOne {
+	mutation := newProductMutation(c.config, OpUpdateOne, withProduct(_m))
+	return &ProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ProjectClient) UpdateOneID(id uuid.UUID) *ProjectUpdateOne {
-	mutation := newProjectMutation(c.config, OpUpdateOne, withProjectID(id))
-	return &ProjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *ProductClient) UpdateOneID(id uuid.UUID) *ProductUpdateOne {
+	mutation := newProductMutation(c.config, OpUpdateOne, withProductID(id))
+	return &ProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Project.
-func (c *ProjectClient) Delete() *ProjectDelete {
-	mutation := newProjectMutation(c.config, OpDelete)
-	return &ProjectDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Product.
+func (c *ProductClient) Delete() *ProductDelete {
+	mutation := newProductMutation(c.config, OpDelete)
+	return &ProductDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *ProjectClient) DeleteOne(_m *Project) *ProjectDeleteOne {
+func (c *ProductClient) DeleteOne(_m *Product) *ProductDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ProjectClient) DeleteOneID(id uuid.UUID) *ProjectDeleteOne {
-	builder := c.Delete().Where(project.ID(id))
+func (c *ProductClient) DeleteOneID(id uuid.UUID) *ProductDeleteOne {
+	builder := c.Delete().Where(product.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &ProjectDeleteOne{builder}
+	return &ProductDeleteOne{builder}
 }
 
-// Query returns a query builder for Project.
-func (c *ProjectClient) Query() *ProjectQuery {
-	return &ProjectQuery{
+// Query returns a query builder for Product.
+func (c *ProductClient) Query() *ProductQuery {
+	return &ProductQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeProject},
+		ctx:    &QueryContext{Type: TypeProduct},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a Project entity by its id.
-func (c *ProjectClient) Get(ctx context.Context, id uuid.UUID) (*Project, error) {
-	return c.Query().Where(project.ID(id)).Only(ctx)
+// Get returns a Product entity by its id.
+func (c *ProductClient) Get(ctx context.Context, id uuid.UUID) (*Product, error) {
+	return c.Query().Where(product.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ProjectClient) GetX(ctx context.Context, id uuid.UUID) *Project {
+func (c *ProductClient) GetX(ctx context.Context, id uuid.UUID) *Product {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -841,15 +1205,15 @@ func (c *ProjectClient) GetX(ctx context.Context, id uuid.UUID) *Project {
 	return obj
 }
 
-// QueryOrganization queries the organization edge of a Project.
-func (c *ProjectClient) QueryOrganization(_m *Project) *OrganizationQuery {
+// QueryOrganization queries the organization edge of a Product.
+func (c *ProductClient) QueryOrganization(_m *Product) *OrganizationQuery {
 	query := (&OrganizationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(project.Table, project.FieldID, id),
+			sqlgraph.From(product.Table, product.FieldID, id),
 			sqlgraph.To(organization.Table, organization.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, project.OrganizationTable, project.OrganizationColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, product.OrganizationTable, product.OrganizationColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -857,15 +1221,31 @@ func (c *ProjectClient) QueryOrganization(_m *Project) *OrganizationQuery {
 	return query
 }
 
-// QueryEvents queries the events edge of a Project.
-func (c *ProjectClient) QueryEvents(_m *Project) *EventQuery {
+// QueryCapabilities queries the capabilities edge of a Product.
+func (c *ProductClient) QueryCapabilities(_m *Product) *CapabilityQuery {
+	query := (&CapabilityClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, id),
+			sqlgraph.To(capability.Table, capability.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.CapabilitiesTable, product.CapabilitiesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryEvents queries the events edge of a Product.
+func (c *ProductClient) QueryEvents(_m *Product) *EventQuery {
 	query := (&EventClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(project.Table, project.FieldID, id),
+			sqlgraph.From(product.Table, product.FieldID, id),
 			sqlgraph.To(event.Table, event.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, project.EventsTable, project.EventsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.EventsTable, product.EventsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -873,15 +1253,15 @@ func (c *ProjectClient) QueryEvents(_m *Project) *EventQuery {
 	return query
 }
 
-// QuerySessions queries the sessions edge of a Project.
-func (c *ProjectClient) QuerySessions(_m *Project) *SessionQuery {
+// QuerySessions queries the sessions edge of a Product.
+func (c *ProductClient) QuerySessions(_m *Product) *SessionQuery {
 	query := (&SessionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(project.Table, project.FieldID, id),
+			sqlgraph.From(product.Table, product.FieldID, id),
 			sqlgraph.To(session.Table, session.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, project.SessionsTable, project.SessionsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.SessionsTable, product.SessionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -889,15 +1269,15 @@ func (c *ProjectClient) QuerySessions(_m *Project) *SessionQuery {
 	return query
 }
 
-// QueryJourneys queries the journeys edge of a Project.
-func (c *ProjectClient) QueryJourneys(_m *Project) *JourneyQuery {
+// QueryJourneys queries the journeys edge of a Product.
+func (c *ProductClient) QueryJourneys(_m *Product) *JourneyQuery {
 	query := (&JourneyClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(project.Table, project.FieldID, id),
+			sqlgraph.From(product.Table, product.FieldID, id),
 			sqlgraph.To(journey.Table, journey.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, project.JourneysTable, project.JourneysColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.JourneysTable, product.JourneysColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -906,27 +1286,27 @@ func (c *ProjectClient) QueryJourneys(_m *Project) *JourneyQuery {
 }
 
 // Hooks returns the client hooks.
-func (c *ProjectClient) Hooks() []Hook {
-	return c.hooks.Project
+func (c *ProductClient) Hooks() []Hook {
+	return c.hooks.Product
 }
 
 // Interceptors returns the client interceptors.
-func (c *ProjectClient) Interceptors() []Interceptor {
-	return c.inters.Project
+func (c *ProductClient) Interceptors() []Interceptor {
+	return c.inters.Product
 }
 
-func (c *ProjectClient) mutate(ctx context.Context, m *ProjectMutation) (Value, error) {
+func (c *ProductClient) mutate(ctx context.Context, m *ProductMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&ProjectCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&ProductCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&ProjectUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&ProductUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&ProjectUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&ProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&ProjectDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&ProductDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown Project mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Product mutation op: %q", m.Op())
 	}
 }
 
@@ -1038,15 +1418,15 @@ func (c *SessionClient) GetX(ctx context.Context, id uuid.UUID) *Session {
 	return obj
 }
 
-// QueryProject queries the project edge of a Session.
-func (c *SessionClient) QueryProject(_m *Session) *ProjectQuery {
-	query := (&ProjectClient{config: c.config}).Query()
+// QueryProduct queries the product edge of a Session.
+func (c *SessionClient) QueryProduct(_m *Session) *ProductQuery {
+	query := (&ProductClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(session.Table, session.FieldID, id),
-			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, session.ProjectTable, session.ProjectColumn),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, session.ProductTable, session.ProductColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1098,9 +1478,10 @@ func (c *SessionClient) mutate(ctx context.Context, m *SessionMutation) (Value, 
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Event, Journey, Organization, Project, Session []ent.Hook
+		Capability, Event, Feature, Journey, Organization, Product, Session []ent.Hook
 	}
 	inters struct {
-		Event, Journey, Organization, Project, Session []ent.Interceptor
+		Capability, Event, Feature, Journey, Organization, Product,
+		Session []ent.Interceptor
 	}
 )

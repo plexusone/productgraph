@@ -61,9 +61,14 @@ func OrgID(v uuid.UUID) predicate.Journey {
 	return predicate.Journey(sql.FieldEQ(FieldOrgID, v))
 }
 
-// ProjectID applies equality check predicate on the "project_id" field. It's identical to ProjectIDEQ.
-func ProjectID(v uuid.UUID) predicate.Journey {
-	return predicate.Journey(sql.FieldEQ(FieldProjectID, v))
+// ProductID applies equality check predicate on the "product_id" field. It's identical to ProductIDEQ.
+func ProductID(v uuid.UUID) predicate.Journey {
+	return predicate.Journey(sql.FieldEQ(FieldProductID, v))
+}
+
+// FeatureID applies equality check predicate on the "feature_id" field. It's identical to FeatureIDEQ.
+func FeatureID(v uuid.UUID) predicate.Journey {
+	return predicate.Journey(sql.FieldEQ(FieldFeatureID, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
@@ -156,24 +161,54 @@ func OrgIDLTE(v uuid.UUID) predicate.Journey {
 	return predicate.Journey(sql.FieldLTE(FieldOrgID, v))
 }
 
-// ProjectIDEQ applies the EQ predicate on the "project_id" field.
-func ProjectIDEQ(v uuid.UUID) predicate.Journey {
-	return predicate.Journey(sql.FieldEQ(FieldProjectID, v))
+// ProductIDEQ applies the EQ predicate on the "product_id" field.
+func ProductIDEQ(v uuid.UUID) predicate.Journey {
+	return predicate.Journey(sql.FieldEQ(FieldProductID, v))
 }
 
-// ProjectIDNEQ applies the NEQ predicate on the "project_id" field.
-func ProjectIDNEQ(v uuid.UUID) predicate.Journey {
-	return predicate.Journey(sql.FieldNEQ(FieldProjectID, v))
+// ProductIDNEQ applies the NEQ predicate on the "product_id" field.
+func ProductIDNEQ(v uuid.UUID) predicate.Journey {
+	return predicate.Journey(sql.FieldNEQ(FieldProductID, v))
 }
 
-// ProjectIDIn applies the In predicate on the "project_id" field.
-func ProjectIDIn(vs ...uuid.UUID) predicate.Journey {
-	return predicate.Journey(sql.FieldIn(FieldProjectID, vs...))
+// ProductIDIn applies the In predicate on the "product_id" field.
+func ProductIDIn(vs ...uuid.UUID) predicate.Journey {
+	return predicate.Journey(sql.FieldIn(FieldProductID, vs...))
 }
 
-// ProjectIDNotIn applies the NotIn predicate on the "project_id" field.
-func ProjectIDNotIn(vs ...uuid.UUID) predicate.Journey {
-	return predicate.Journey(sql.FieldNotIn(FieldProjectID, vs...))
+// ProductIDNotIn applies the NotIn predicate on the "product_id" field.
+func ProductIDNotIn(vs ...uuid.UUID) predicate.Journey {
+	return predicate.Journey(sql.FieldNotIn(FieldProductID, vs...))
+}
+
+// FeatureIDEQ applies the EQ predicate on the "feature_id" field.
+func FeatureIDEQ(v uuid.UUID) predicate.Journey {
+	return predicate.Journey(sql.FieldEQ(FieldFeatureID, v))
+}
+
+// FeatureIDNEQ applies the NEQ predicate on the "feature_id" field.
+func FeatureIDNEQ(v uuid.UUID) predicate.Journey {
+	return predicate.Journey(sql.FieldNEQ(FieldFeatureID, v))
+}
+
+// FeatureIDIn applies the In predicate on the "feature_id" field.
+func FeatureIDIn(vs ...uuid.UUID) predicate.Journey {
+	return predicate.Journey(sql.FieldIn(FieldFeatureID, vs...))
+}
+
+// FeatureIDNotIn applies the NotIn predicate on the "feature_id" field.
+func FeatureIDNotIn(vs ...uuid.UUID) predicate.Journey {
+	return predicate.Journey(sql.FieldNotIn(FieldFeatureID, vs...))
+}
+
+// FeatureIDIsNil applies the IsNil predicate on the "feature_id" field.
+func FeatureIDIsNil() predicate.Journey {
+	return predicate.Journey(sql.FieldIsNull(FieldFeatureID))
+}
+
+// FeatureIDNotNil applies the NotNil predicate on the "feature_id" field.
+func FeatureIDNotNil() predicate.Journey {
+	return predicate.Journey(sql.FieldNotNull(FieldFeatureID))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -636,21 +671,44 @@ func UpdatedAtLTE(v time.Time) predicate.Journey {
 	return predicate.Journey(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
-// HasProject applies the HasEdge predicate on the "project" edge.
-func HasProject() predicate.Journey {
+// HasProduct applies the HasEdge predicate on the "product" edge.
+func HasProduct() predicate.Journey {
 	return predicate.Journey(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ProjectTable, ProjectColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProductTable, ProductColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasProjectWith applies the HasEdge predicate on the "project" edge with a given conditions (other predicates).
-func HasProjectWith(preds ...predicate.Project) predicate.Journey {
+// HasProductWith applies the HasEdge predicate on the "product" edge with a given conditions (other predicates).
+func HasProductWith(preds ...predicate.Product) predicate.Journey {
 	return predicate.Journey(func(s *sql.Selector) {
-		step := newProjectStep()
+		step := newProductStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFeature applies the HasEdge predicate on the "feature" edge.
+func HasFeature() predicate.Journey {
+	return predicate.Journey(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, FeatureTable, FeatureColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFeatureWith applies the HasEdge predicate on the "feature" edge with a given conditions (other predicates).
+func HasFeatureWith(preds ...predicate.Feature) predicate.Journey {
+	return predicate.Journey(func(s *sql.Selector) {
+		step := newFeatureStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

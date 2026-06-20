@@ -22,7 +22,7 @@ func (Event) Fields() []ent.Field {
 			Default(uuid.New).
 			Immutable(),
 		field.UUID("org_id", uuid.UUID{}), // RLS column
-		field.UUID("project_id", uuid.UUID{}),
+		field.UUID("product_id", uuid.UUID{}),
 		field.String("event_id").
 			NotEmpty().
 			MaxLen(255),
@@ -175,9 +175,9 @@ func (Event) Fields() []ent.Field {
 // Edges of the Event.
 func (Event) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("project", Project.Type).
+		edge.From("product", Product.Type).
 			Ref("events").
-			Field("project_id").
+			Field("product_id").
 			Unique().
 			Required(),
 		edge.From("journey", Journey.Type).
@@ -191,12 +191,12 @@ func (Event) Edges() []ent.Edge {
 func (Event) Indexes() []ent.Index {
 	return []ent.Index{
 		// Primary query patterns
-		index.Fields("org_id", "project_id", "timestamp"),
+		index.Fields("org_id", "product_id", "timestamp"),
 		index.Fields("org_id", "session_id"),
 		index.Fields("org_id", "user_id"),
 		index.Fields("org_id", "journey_id"),
 		index.Fields("org_id", "event_type", "timestamp"),
-		// Unique constraint for event_id within project
-		index.Fields("project_id", "event_id").Unique(),
+		// Unique constraint for event_id within product
+		index.Fields("product_id", "event_id").Unique(),
 	}
 }

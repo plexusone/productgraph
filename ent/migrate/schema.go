@@ -8,6 +8,43 @@ import (
 )
 
 var (
+	// CapabilitiesColumns holds the columns for the "capabilities" table.
+	CapabilitiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "org_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "display_order", Type: field.TypeInt, Default: 0},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "product_id", Type: field.TypeUUID},
+	}
+	// CapabilitiesTable holds the schema information for the "capabilities" table.
+	CapabilitiesTable = &schema.Table{
+		Name:       "capabilities",
+		Columns:    CapabilitiesColumns,
+		PrimaryKey: []*schema.Column{CapabilitiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "capabilities_products_capabilities",
+				Columns:    []*schema.Column{CapabilitiesColumns[7]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "capability_org_id_product_id",
+				Unique:  false,
+				Columns: []*schema.Column{CapabilitiesColumns[1], CapabilitiesColumns[7]},
+			},
+			{
+				Name:    "capability_product_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{CapabilitiesColumns[7], CapabilitiesColumns[2]},
+			},
+		},
+	}
 	// EventsColumns holds the columns for the "events" table.
 	EventsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -56,7 +93,7 @@ var (
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "journey_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "project_id", Type: field.TypeUUID},
+		{Name: "product_id", Type: field.TypeUUID},
 	}
 	// EventsTable holds the schema information for the "events" table.
 	EventsTable = &schema.Table{
@@ -71,15 +108,15 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "events_projects_events",
+				Symbol:     "events_products_events",
 				Columns:    []*schema.Column{EventsColumns[46]},
-				RefColumns: []*schema.Column{ProjectsColumns[0]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "event_org_id_project_id_timestamp",
+				Name:    "event_org_id_product_id_timestamp",
 				Unique:  false,
 				Columns: []*schema.Column{EventsColumns[1], EventsColumns[46], EventsColumns[7]},
 			},
@@ -104,9 +141,55 @@ var (
 				Columns: []*schema.Column{EventsColumns[1], EventsColumns[5], EventsColumns[7]},
 			},
 			{
-				Name:    "event_project_id_event_id",
+				Name:    "event_product_id_event_id",
 				Unique:  true,
 				Columns: []*schema.Column{EventsColumns[46], EventsColumns[2]},
+			},
+		},
+	}
+	// FeaturesColumns holds the columns for the "features" table.
+	FeaturesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "org_id", Type: field.TypeUUID},
+		{Name: "product_id", Type: field.TypeUUID},
+		{Name: "name", Type: field.TypeString, Size: 255},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "admin_path", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "notes", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "documentation", Type: field.TypeJSON, Nullable: true},
+		{Name: "display_order", Type: field.TypeInt, Default: 0},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "capability_id", Type: field.TypeUUID},
+	}
+	// FeaturesTable holds the schema information for the "features" table.
+	FeaturesTable = &schema.Table{
+		Name:       "features",
+		Columns:    FeaturesColumns,
+		PrimaryKey: []*schema.Column{FeaturesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "features_capabilities_features",
+				Columns:    []*schema.Column{FeaturesColumns[11]},
+				RefColumns: []*schema.Column{CapabilitiesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "feature_org_id_product_id",
+				Unique:  false,
+				Columns: []*schema.Column{FeaturesColumns[1], FeaturesColumns[2]},
+			},
+			{
+				Name:    "feature_org_id_capability_id",
+				Unique:  false,
+				Columns: []*schema.Column{FeaturesColumns[1], FeaturesColumns[11]},
+			},
+			{
+				Name:    "feature_capability_id_name",
+				Unique:  true,
+				Columns: []*schema.Column{FeaturesColumns[11], FeaturesColumns[3]},
 			},
 		},
 	}
@@ -127,7 +210,8 @@ var (
 		{Name: "is_active", Type: field.TypeBool, Default: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "project_id", Type: field.TypeUUID},
+		{Name: "feature_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "product_id", Type: field.TypeUUID},
 	}
 	// JourneysTable holds the schema information for the "journeys" table.
 	JourneysTable = &schema.Table{
@@ -136,17 +220,23 @@ var (
 		PrimaryKey: []*schema.Column{JourneysColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "journeys_projects_journeys",
+				Symbol:     "journeys_features_journeys",
 				Columns:    []*schema.Column{JourneysColumns[15]},
-				RefColumns: []*schema.Column{ProjectsColumns[0]},
+				RefColumns: []*schema.Column{FeaturesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "journeys_products_journeys",
+				Columns:    []*schema.Column{JourneysColumns[16]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "journey_org_id_project_id",
+				Name:    "journey_org_id_product_id",
 				Unique:  false,
-				Columns: []*schema.Column{JourneysColumns[1], JourneysColumns[15]},
+				Columns: []*schema.Column{JourneysColumns[1], JourneysColumns[16]},
 			},
 			{
 				Name:    "journey_org_id_is_active",
@@ -154,9 +244,14 @@ var (
 				Columns: []*schema.Column{JourneysColumns[1], JourneysColumns[12]},
 			},
 			{
-				Name:    "journey_project_id_name",
+				Name:    "journey_org_id_feature_id",
+				Unique:  false,
+				Columns: []*schema.Column{JourneysColumns[1], JourneysColumns[15]},
+			},
+			{
+				Name:    "journey_product_id_name",
 				Unique:  true,
-				Columns: []*schema.Column{JourneysColumns[15], JourneysColumns[2]},
+				Columns: []*schema.Column{JourneysColumns[16], JourneysColumns[2]},
 			},
 		},
 	}
@@ -174,8 +269,8 @@ var (
 		Columns:    OrganizationsColumns,
 		PrimaryKey: []*schema.Column{OrganizationsColumns[0]},
 	}
-	// ProjectsColumns holds the columns for the "projects" table.
-	ProjectsColumns = []*schema.Column{
+	// ProductsColumns holds the columns for the "products" table.
+	ProductsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "name", Type: field.TypeString, Size: 255},
 		{Name: "slug", Type: field.TypeString, Size: 100},
@@ -185,29 +280,29 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "org_id", Type: field.TypeUUID},
 	}
-	// ProjectsTable holds the schema information for the "projects" table.
-	ProjectsTable = &schema.Table{
-		Name:       "projects",
-		Columns:    ProjectsColumns,
-		PrimaryKey: []*schema.Column{ProjectsColumns[0]},
+	// ProductsTable holds the schema information for the "products" table.
+	ProductsTable = &schema.Table{
+		Name:       "products",
+		Columns:    ProductsColumns,
+		PrimaryKey: []*schema.Column{ProductsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "projects_organizations_projects",
-				Columns:    []*schema.Column{ProjectsColumns[7]},
+				Symbol:     "products_organizations_products",
+				Columns:    []*schema.Column{ProductsColumns[7]},
 				RefColumns: []*schema.Column{OrganizationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "project_org_id_slug",
+				Name:    "product_org_id_slug",
 				Unique:  true,
-				Columns: []*schema.Column{ProjectsColumns[7], ProjectsColumns[2]},
+				Columns: []*schema.Column{ProductsColumns[7], ProductsColumns[2]},
 			},
 			{
-				Name:    "project_api_key",
+				Name:    "product_api_key",
 				Unique:  false,
-				Columns: []*schema.Column{ProjectsColumns[3]},
+				Columns: []*schema.Column{ProductsColumns[3]},
 			},
 		},
 	}
@@ -236,7 +331,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "journey_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "project_id", Type: field.TypeUUID},
+		{Name: "product_id", Type: field.TypeUUID},
 	}
 	// SessionsTable holds the schema information for the "sessions" table.
 	SessionsTable = &schema.Table{
@@ -251,15 +346,15 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "sessions_projects_sessions",
+				Symbol:     "sessions_products_sessions",
 				Columns:    []*schema.Column{SessionsColumns[23]},
-				RefColumns: []*schema.Column{ProjectsColumns[0]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "session_org_id_project_id_started_at",
+				Name:    "session_org_id_product_id_started_at",
 				Unique:  false,
 				Columns: []*schema.Column{SessionsColumns[1], SessionsColumns[23], SessionsColumns[4]},
 			},
@@ -284,7 +379,7 @@ var (
 				Columns: []*schema.Column{SessionsColumns[1], SessionsColumns[12]},
 			},
 			{
-				Name:    "session_project_id_session_id",
+				Name:    "session_product_id_session_id",
 				Unique:  true,
 				Columns: []*schema.Column{SessionsColumns[23], SessionsColumns[2]},
 			},
@@ -292,19 +387,24 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CapabilitiesTable,
 		EventsTable,
+		FeaturesTable,
 		JourneysTable,
 		OrganizationsTable,
-		ProjectsTable,
+		ProductsTable,
 		SessionsTable,
 	}
 )
 
 func init() {
+	CapabilitiesTable.ForeignKeys[0].RefTable = ProductsTable
 	EventsTable.ForeignKeys[0].RefTable = JourneysTable
-	EventsTable.ForeignKeys[1].RefTable = ProjectsTable
-	JourneysTable.ForeignKeys[0].RefTable = ProjectsTable
-	ProjectsTable.ForeignKeys[0].RefTable = OrganizationsTable
+	EventsTable.ForeignKeys[1].RefTable = ProductsTable
+	FeaturesTable.ForeignKeys[0].RefTable = CapabilitiesTable
+	JourneysTable.ForeignKeys[0].RefTable = FeaturesTable
+	JourneysTable.ForeignKeys[1].RefTable = ProductsTable
+	ProductsTable.ForeignKeys[0].RefTable = OrganizationsTable
 	SessionsTable.ForeignKeys[0].RefTable = JourneysTable
-	SessionsTable.ForeignKeys[1].RefTable = ProjectsTable
+	SessionsTable.ForeignKeys[1].RefTable = ProductsTable
 }

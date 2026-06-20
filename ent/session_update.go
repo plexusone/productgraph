@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
@@ -45,16 +45,16 @@ func (_u *SessionUpdate) SetNillableOrgID(v *uuid.UUID) *SessionUpdate {
 	return _u
 }
 
-// SetProjectID sets the "project_id" field.
-func (_u *SessionUpdate) SetProjectID(v uuid.UUID) *SessionUpdate {
-	_u.mutation.SetProjectID(v)
+// SetProductID sets the "product_id" field.
+func (_u *SessionUpdate) SetProductID(v uuid.UUID) *SessionUpdate {
+	_u.mutation.SetProductID(v)
 	return _u
 }
 
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableProjectID(v *uuid.UUID) *SessionUpdate {
+// SetNillableProductID sets the "product_id" field if the given value is not nil.
+func (_u *SessionUpdate) SetNillableProductID(v *uuid.UUID) *SessionUpdate {
 	if v != nil {
-		_u.SetProjectID(*v)
+		_u.SetProductID(*v)
 	}
 	return _u
 }
@@ -436,9 +436,9 @@ func (_u *SessionUpdate) SetUpdatedAt(v time.Time) *SessionUpdate {
 	return _u
 }
 
-// SetProject sets the "project" edge to the Project entity.
-func (_u *SessionUpdate) SetProject(v *Project) *SessionUpdate {
-	return _u.SetProjectID(v.ID)
+// SetProduct sets the "product" edge to the Product entity.
+func (_u *SessionUpdate) SetProduct(v *Product) *SessionUpdate {
+	return _u.SetProductID(v.ID)
 }
 
 // SetJourney sets the "journey" edge to the Journey entity.
@@ -451,9 +451,9 @@ func (_u *SessionUpdate) Mutation() *SessionMutation {
 	return _u.mutation
 }
 
-// ClearProject clears the "project" edge to the Project entity.
-func (_u *SessionUpdate) ClearProject() *SessionUpdate {
-	_u.mutation.ClearProject()
+// ClearProduct clears the "product" edge to the Product entity.
+func (_u *SessionUpdate) ClearProduct() *SessionUpdate {
+	_u.mutation.ClearProduct()
 	return _u
 }
 
@@ -566,8 +566,8 @@ func (_u *SessionUpdate) check() error {
 			return &ValidationError{Name: "city", err: fmt.Errorf(`ent: validator failed for field "Session.city": %w`, err)}
 		}
 	}
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Session.project"`)
+	if _u.mutation.ProductCleared() && len(_u.mutation.ProductIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Session.product"`)
 	}
 	return nil
 }
@@ -692,28 +692,28 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(session.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.ProjectCleared() {
+	if _u.mutation.ProductCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.ProjectTable,
-			Columns: []string{session.ProjectColumn},
+			Table:   session.ProductTable,
+			Columns: []string{session.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ProjectIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ProductIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.ProjectTable,
-			Columns: []string{session.ProjectColumn},
+			Table:   session.ProductTable,
+			Columns: []string{session.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -784,16 +784,16 @@ func (_u *SessionUpdateOne) SetNillableOrgID(v *uuid.UUID) *SessionUpdateOne {
 	return _u
 }
 
-// SetProjectID sets the "project_id" field.
-func (_u *SessionUpdateOne) SetProjectID(v uuid.UUID) *SessionUpdateOne {
-	_u.mutation.SetProjectID(v)
+// SetProductID sets the "product_id" field.
+func (_u *SessionUpdateOne) SetProductID(v uuid.UUID) *SessionUpdateOne {
+	_u.mutation.SetProductID(v)
 	return _u
 }
 
-// SetNillableProjectID sets the "project_id" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableProjectID(v *uuid.UUID) *SessionUpdateOne {
+// SetNillableProductID sets the "product_id" field if the given value is not nil.
+func (_u *SessionUpdateOne) SetNillableProductID(v *uuid.UUID) *SessionUpdateOne {
 	if v != nil {
-		_u.SetProjectID(*v)
+		_u.SetProductID(*v)
 	}
 	return _u
 }
@@ -1175,9 +1175,9 @@ func (_u *SessionUpdateOne) SetUpdatedAt(v time.Time) *SessionUpdateOne {
 	return _u
 }
 
-// SetProject sets the "project" edge to the Project entity.
-func (_u *SessionUpdateOne) SetProject(v *Project) *SessionUpdateOne {
-	return _u.SetProjectID(v.ID)
+// SetProduct sets the "product" edge to the Product entity.
+func (_u *SessionUpdateOne) SetProduct(v *Product) *SessionUpdateOne {
+	return _u.SetProductID(v.ID)
 }
 
 // SetJourney sets the "journey" edge to the Journey entity.
@@ -1190,9 +1190,9 @@ func (_u *SessionUpdateOne) Mutation() *SessionMutation {
 	return _u.mutation
 }
 
-// ClearProject clears the "project" edge to the Project entity.
-func (_u *SessionUpdateOne) ClearProject() *SessionUpdateOne {
-	_u.mutation.ClearProject()
+// ClearProduct clears the "product" edge to the Product entity.
+func (_u *SessionUpdateOne) ClearProduct() *SessionUpdateOne {
+	_u.mutation.ClearProduct()
 	return _u
 }
 
@@ -1318,8 +1318,8 @@ func (_u *SessionUpdateOne) check() error {
 			return &ValidationError{Name: "city", err: fmt.Errorf(`ent: validator failed for field "Session.city": %w`, err)}
 		}
 	}
-	if _u.mutation.ProjectCleared() && len(_u.mutation.ProjectIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Session.project"`)
+	if _u.mutation.ProductCleared() && len(_u.mutation.ProductIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Session.product"`)
 	}
 	return nil
 }
@@ -1461,28 +1461,28 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(session.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.ProjectCleared() {
+	if _u.mutation.ProductCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.ProjectTable,
-			Columns: []string{session.ProjectColumn},
+			Table:   session.ProductTable,
+			Columns: []string{session.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ProjectIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ProductIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.ProjectTable,
-			Columns: []string{session.ProjectColumn},
+			Table:   session.ProductTable,
+			Columns: []string{session.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

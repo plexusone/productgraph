@@ -12,10 +12,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/plexusone/productgraph/ent/capability"
 	"github.com/plexusone/productgraph/ent/event"
+	"github.com/plexusone/productgraph/ent/feature"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/organization"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
@@ -77,10 +79,12 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			capability.Table:   capability.ValidColumn,
 			event.Table:        event.ValidColumn,
+			feature.Table:      feature.ValidColumn,
 			journey.Table:      journey.ValidColumn,
 			organization.Table: organization.ValidColumn,
-			project.Table:      project.ValidColumn,
+			product.Table:      product.ValidColumn,
 			session.Table:      session.ValidColumn,
 		})
 	})

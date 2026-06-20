@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/journey"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
@@ -29,9 +29,9 @@ func (_c *SessionCreate) SetOrgID(v uuid.UUID) *SessionCreate {
 	return _c
 }
 
-// SetProjectID sets the "project_id" field.
-func (_c *SessionCreate) SetProjectID(v uuid.UUID) *SessionCreate {
-	_c.mutation.SetProjectID(v)
+// SetProductID sets the "product_id" field.
+func (_c *SessionCreate) SetProductID(v uuid.UUID) *SessionCreate {
+	_c.mutation.SetProductID(v)
 	return _c
 }
 
@@ -327,9 +327,9 @@ func (_c *SessionCreate) SetNillableID(v *uuid.UUID) *SessionCreate {
 	return _c
 }
 
-// SetProject sets the "project" edge to the Project entity.
-func (_c *SessionCreate) SetProject(v *Project) *SessionCreate {
-	return _c.SetProjectID(v.ID)
+// SetProduct sets the "product" edge to the Product entity.
+func (_c *SessionCreate) SetProduct(v *Product) *SessionCreate {
+	return _c.SetProductID(v.ID)
 }
 
 // SetJourney sets the "journey" edge to the Journey entity.
@@ -403,8 +403,8 @@ func (_c *SessionCreate) check() error {
 	if _, ok := _c.mutation.OrgID(); !ok {
 		return &ValidationError{Name: "org_id", err: errors.New(`ent: missing required field "Session.org_id"`)}
 	}
-	if _, ok := _c.mutation.ProjectID(); !ok {
-		return &ValidationError{Name: "project_id", err: errors.New(`ent: missing required field "Session.project_id"`)}
+	if _, ok := _c.mutation.ProductID(); !ok {
+		return &ValidationError{Name: "product_id", err: errors.New(`ent: missing required field "Session.product_id"`)}
 	}
 	if _, ok := _c.mutation.SessionID(); !ok {
 		return &ValidationError{Name: "session_id", err: errors.New(`ent: missing required field "Session.session_id"`)}
@@ -492,8 +492,8 @@ func (_c *SessionCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Session.updated_at"`)}
 	}
-	if len(_c.mutation.ProjectIDs()) == 0 {
-		return &ValidationError{Name: "project", err: errors.New(`ent: missing required edge "Session.project"`)}
+	if len(_c.mutation.ProductIDs()) == 0 {
+		return &ValidationError{Name: "product", err: errors.New(`ent: missing required edge "Session.product"`)}
 	}
 	return nil
 }
@@ -614,21 +614,21 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		_spec.SetField(session.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := _c.mutation.ProjectIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ProductIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.ProjectTable,
-			Columns: []string{session.ProjectColumn},
+			Table:   session.ProductTable,
+			Columns: []string{session.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ProjectID = nodes[0]
+		_node.ProductID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.JourneyIDs(); len(nodes) > 0 {

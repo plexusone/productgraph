@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/event"
 	"github.com/plexusone/productgraph/ent/journey"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 )
 
 // EventCreate is the builder for creating a Event entity.
@@ -29,9 +29,9 @@ func (_c *EventCreate) SetOrgID(v uuid.UUID) *EventCreate {
 	return _c
 }
 
-// SetProjectID sets the "project_id" field.
-func (_c *EventCreate) SetProjectID(v uuid.UUID) *EventCreate {
-	_c.mutation.SetProjectID(v)
+// SetProductID sets the "product_id" field.
+func (_c *EventCreate) SetProductID(v uuid.UUID) *EventCreate {
+	_c.mutation.SetProductID(v)
 	return _c
 }
 
@@ -625,9 +625,9 @@ func (_c *EventCreate) SetNillableID(v *uuid.UUID) *EventCreate {
 	return _c
 }
 
-// SetProject sets the "project" edge to the Project entity.
-func (_c *EventCreate) SetProject(v *Project) *EventCreate {
-	return _c.SetProjectID(v.ID)
+// SetProduct sets the "product" edge to the Product entity.
+func (_c *EventCreate) SetProduct(v *Product) *EventCreate {
+	return _c.SetProductID(v.ID)
 }
 
 // SetJourney sets the "journey" edge to the Journey entity.
@@ -689,8 +689,8 @@ func (_c *EventCreate) check() error {
 	if _, ok := _c.mutation.OrgID(); !ok {
 		return &ValidationError{Name: "org_id", err: errors.New(`ent: missing required field "Event.org_id"`)}
 	}
-	if _, ok := _c.mutation.ProjectID(); !ok {
-		return &ValidationError{Name: "project_id", err: errors.New(`ent: missing required field "Event.project_id"`)}
+	if _, ok := _c.mutation.ProductID(); !ok {
+		return &ValidationError{Name: "product_id", err: errors.New(`ent: missing required field "Event.product_id"`)}
 	}
 	if _, ok := _c.mutation.EventID(); !ok {
 		return &ValidationError{Name: "event_id", err: errors.New(`ent: missing required field "Event.event_id"`)}
@@ -845,8 +845,8 @@ func (_c *EventCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Event.created_at"`)}
 	}
-	if len(_c.mutation.ProjectIDs()) == 0 {
-		return &ValidationError{Name: "project", err: errors.New(`ent: missing required edge "Event.project"`)}
+	if len(_c.mutation.ProductIDs()) == 0 {
+		return &ValidationError{Name: "product", err: errors.New(`ent: missing required edge "Event.product"`)}
 	}
 	return nil
 }
@@ -1059,21 +1059,21 @@ func (_c *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 		_spec.SetField(event.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := _c.mutation.ProjectIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ProductIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   event.ProjectTable,
-			Columns: []string{event.ProjectColumn},
+			Table:   event.ProductTable,
+			Columns: []string{event.ProductColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ProjectID = nodes[0]
+		_node.ProductID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.JourneyIDs(); len(nodes) > 0 {

@@ -12,35 +12,36 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/plexusone/productgraph/ent/capability"
 	"github.com/plexusone/productgraph/ent/event"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/organization"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
-// ProjectUpdate is the builder for updating Project entities.
-type ProjectUpdate struct {
+// ProductUpdate is the builder for updating Product entities.
+type ProductUpdate struct {
 	config
 	hooks    []Hook
-	mutation *ProjectMutation
+	mutation *ProductMutation
 }
 
-// Where appends a list predicates to the ProjectUpdate builder.
-func (_u *ProjectUpdate) Where(ps ...predicate.Project) *ProjectUpdate {
+// Where appends a list predicates to the ProductUpdate builder.
+func (_u *ProductUpdate) Where(ps ...predicate.Product) *ProductUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetOrgID sets the "org_id" field.
-func (_u *ProjectUpdate) SetOrgID(v uuid.UUID) *ProjectUpdate {
+func (_u *ProductUpdate) SetOrgID(v uuid.UUID) *ProductUpdate {
 	_u.mutation.SetOrgID(v)
 	return _u
 }
 
 // SetNillableOrgID sets the "org_id" field if the given value is not nil.
-func (_u *ProjectUpdate) SetNillableOrgID(v *uuid.UUID) *ProjectUpdate {
+func (_u *ProductUpdate) SetNillableOrgID(v *uuid.UUID) *ProductUpdate {
 	if v != nil {
 		_u.SetOrgID(*v)
 	}
@@ -48,13 +49,13 @@ func (_u *ProjectUpdate) SetNillableOrgID(v *uuid.UUID) *ProjectUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *ProjectUpdate) SetName(v string) *ProjectUpdate {
+func (_u *ProductUpdate) SetName(v string) *ProductUpdate {
 	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *ProjectUpdate) SetNillableName(v *string) *ProjectUpdate {
+func (_u *ProductUpdate) SetNillableName(v *string) *ProductUpdate {
 	if v != nil {
 		_u.SetName(*v)
 	}
@@ -62,13 +63,13 @@ func (_u *ProjectUpdate) SetNillableName(v *string) *ProjectUpdate {
 }
 
 // SetSlug sets the "slug" field.
-func (_u *ProjectUpdate) SetSlug(v string) *ProjectUpdate {
+func (_u *ProductUpdate) SetSlug(v string) *ProductUpdate {
 	_u.mutation.SetSlug(v)
 	return _u
 }
 
 // SetNillableSlug sets the "slug" field if the given value is not nil.
-func (_u *ProjectUpdate) SetNillableSlug(v *string) *ProjectUpdate {
+func (_u *ProductUpdate) SetNillableSlug(v *string) *ProductUpdate {
 	if v != nil {
 		_u.SetSlug(*v)
 	}
@@ -76,13 +77,13 @@ func (_u *ProjectUpdate) SetNillableSlug(v *string) *ProjectUpdate {
 }
 
 // SetAPIKey sets the "api_key" field.
-func (_u *ProjectUpdate) SetAPIKey(v string) *ProjectUpdate {
+func (_u *ProductUpdate) SetAPIKey(v string) *ProductUpdate {
 	_u.mutation.SetAPIKey(v)
 	return _u
 }
 
 // SetNillableAPIKey sets the "api_key" field if the given value is not nil.
-func (_u *ProjectUpdate) SetNillableAPIKey(v *string) *ProjectUpdate {
+func (_u *ProductUpdate) SetNillableAPIKey(v *string) *ProductUpdate {
 	if v != nil {
 		_u.SetAPIKey(*v)
 	}
@@ -90,42 +91,57 @@ func (_u *ProjectUpdate) SetNillableAPIKey(v *string) *ProjectUpdate {
 }
 
 // SetSettings sets the "settings" field.
-func (_u *ProjectUpdate) SetSettings(v map[string]interface{}) *ProjectUpdate {
+func (_u *ProductUpdate) SetSettings(v map[string]interface{}) *ProductUpdate {
 	_u.mutation.SetSettings(v)
 	return _u
 }
 
 // ClearSettings clears the value of the "settings" field.
-func (_u *ProjectUpdate) ClearSettings() *ProjectUpdate {
+func (_u *ProductUpdate) ClearSettings() *ProductUpdate {
 	_u.mutation.ClearSettings()
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *ProjectUpdate) SetUpdatedAt(v time.Time) *ProjectUpdate {
+func (_u *ProductUpdate) SetUpdatedAt(v time.Time) *ProductUpdate {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetOrganizationID sets the "organization" edge to the Organization entity by ID.
-func (_u *ProjectUpdate) SetOrganizationID(id uuid.UUID) *ProjectUpdate {
+func (_u *ProductUpdate) SetOrganizationID(id uuid.UUID) *ProductUpdate {
 	_u.mutation.SetOrganizationID(id)
 	return _u
 }
 
 // SetOrganization sets the "organization" edge to the Organization entity.
-func (_u *ProjectUpdate) SetOrganization(v *Organization) *ProjectUpdate {
+func (_u *ProductUpdate) SetOrganization(v *Organization) *ProductUpdate {
 	return _u.SetOrganizationID(v.ID)
 }
 
+// AddCapabilityIDs adds the "capabilities" edge to the Capability entity by IDs.
+func (_u *ProductUpdate) AddCapabilityIDs(ids ...uuid.UUID) *ProductUpdate {
+	_u.mutation.AddCapabilityIDs(ids...)
+	return _u
+}
+
+// AddCapabilities adds the "capabilities" edges to the Capability entity.
+func (_u *ProductUpdate) AddCapabilities(v ...*Capability) *ProductUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCapabilityIDs(ids...)
+}
+
 // AddEventIDs adds the "events" edge to the Event entity by IDs.
-func (_u *ProjectUpdate) AddEventIDs(ids ...uuid.UUID) *ProjectUpdate {
+func (_u *ProductUpdate) AddEventIDs(ids ...uuid.UUID) *ProductUpdate {
 	_u.mutation.AddEventIDs(ids...)
 	return _u
 }
 
 // AddEvents adds the "events" edges to the Event entity.
-func (_u *ProjectUpdate) AddEvents(v ...*Event) *ProjectUpdate {
+func (_u *ProductUpdate) AddEvents(v ...*Event) *ProductUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -134,13 +150,13 @@ func (_u *ProjectUpdate) AddEvents(v ...*Event) *ProjectUpdate {
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (_u *ProjectUpdate) AddSessionIDs(ids ...uuid.UUID) *ProjectUpdate {
+func (_u *ProductUpdate) AddSessionIDs(ids ...uuid.UUID) *ProductUpdate {
 	_u.mutation.AddSessionIDs(ids...)
 	return _u
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (_u *ProjectUpdate) AddSessions(v ...*Session) *ProjectUpdate {
+func (_u *ProductUpdate) AddSessions(v ...*Session) *ProductUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -149,13 +165,13 @@ func (_u *ProjectUpdate) AddSessions(v ...*Session) *ProjectUpdate {
 }
 
 // AddJourneyIDs adds the "journeys" edge to the Journey entity by IDs.
-func (_u *ProjectUpdate) AddJourneyIDs(ids ...uuid.UUID) *ProjectUpdate {
+func (_u *ProductUpdate) AddJourneyIDs(ids ...uuid.UUID) *ProductUpdate {
 	_u.mutation.AddJourneyIDs(ids...)
 	return _u
 }
 
 // AddJourneys adds the "journeys" edges to the Journey entity.
-func (_u *ProjectUpdate) AddJourneys(v ...*Journey) *ProjectUpdate {
+func (_u *ProductUpdate) AddJourneys(v ...*Journey) *ProductUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -163,31 +179,52 @@ func (_u *ProjectUpdate) AddJourneys(v ...*Journey) *ProjectUpdate {
 	return _u.AddJourneyIDs(ids...)
 }
 
-// Mutation returns the ProjectMutation object of the builder.
-func (_u *ProjectUpdate) Mutation() *ProjectMutation {
+// Mutation returns the ProductMutation object of the builder.
+func (_u *ProductUpdate) Mutation() *ProductMutation {
 	return _u.mutation
 }
 
 // ClearOrganization clears the "organization" edge to the Organization entity.
-func (_u *ProjectUpdate) ClearOrganization() *ProjectUpdate {
+func (_u *ProductUpdate) ClearOrganization() *ProductUpdate {
 	_u.mutation.ClearOrganization()
 	return _u
 }
 
+// ClearCapabilities clears all "capabilities" edges to the Capability entity.
+func (_u *ProductUpdate) ClearCapabilities() *ProductUpdate {
+	_u.mutation.ClearCapabilities()
+	return _u
+}
+
+// RemoveCapabilityIDs removes the "capabilities" edge to Capability entities by IDs.
+func (_u *ProductUpdate) RemoveCapabilityIDs(ids ...uuid.UUID) *ProductUpdate {
+	_u.mutation.RemoveCapabilityIDs(ids...)
+	return _u
+}
+
+// RemoveCapabilities removes "capabilities" edges to Capability entities.
+func (_u *ProductUpdate) RemoveCapabilities(v ...*Capability) *ProductUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCapabilityIDs(ids...)
+}
+
 // ClearEvents clears all "events" edges to the Event entity.
-func (_u *ProjectUpdate) ClearEvents() *ProjectUpdate {
+func (_u *ProductUpdate) ClearEvents() *ProductUpdate {
 	_u.mutation.ClearEvents()
 	return _u
 }
 
 // RemoveEventIDs removes the "events" edge to Event entities by IDs.
-func (_u *ProjectUpdate) RemoveEventIDs(ids ...uuid.UUID) *ProjectUpdate {
+func (_u *ProductUpdate) RemoveEventIDs(ids ...uuid.UUID) *ProductUpdate {
 	_u.mutation.RemoveEventIDs(ids...)
 	return _u
 }
 
 // RemoveEvents removes "events" edges to Event entities.
-func (_u *ProjectUpdate) RemoveEvents(v ...*Event) *ProjectUpdate {
+func (_u *ProductUpdate) RemoveEvents(v ...*Event) *ProductUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -196,19 +233,19 @@ func (_u *ProjectUpdate) RemoveEvents(v ...*Event) *ProjectUpdate {
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
-func (_u *ProjectUpdate) ClearSessions() *ProjectUpdate {
+func (_u *ProductUpdate) ClearSessions() *ProductUpdate {
 	_u.mutation.ClearSessions()
 	return _u
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (_u *ProjectUpdate) RemoveSessionIDs(ids ...uuid.UUID) *ProjectUpdate {
+func (_u *ProductUpdate) RemoveSessionIDs(ids ...uuid.UUID) *ProductUpdate {
 	_u.mutation.RemoveSessionIDs(ids...)
 	return _u
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
-func (_u *ProjectUpdate) RemoveSessions(v ...*Session) *ProjectUpdate {
+func (_u *ProductUpdate) RemoveSessions(v ...*Session) *ProductUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -217,19 +254,19 @@ func (_u *ProjectUpdate) RemoveSessions(v ...*Session) *ProjectUpdate {
 }
 
 // ClearJourneys clears all "journeys" edges to the Journey entity.
-func (_u *ProjectUpdate) ClearJourneys() *ProjectUpdate {
+func (_u *ProductUpdate) ClearJourneys() *ProductUpdate {
 	_u.mutation.ClearJourneys()
 	return _u
 }
 
 // RemoveJourneyIDs removes the "journeys" edge to Journey entities by IDs.
-func (_u *ProjectUpdate) RemoveJourneyIDs(ids ...uuid.UUID) *ProjectUpdate {
+func (_u *ProductUpdate) RemoveJourneyIDs(ids ...uuid.UUID) *ProductUpdate {
 	_u.mutation.RemoveJourneyIDs(ids...)
 	return _u
 }
 
 // RemoveJourneys removes "journeys" edges to Journey entities.
-func (_u *ProjectUpdate) RemoveJourneys(v ...*Journey) *ProjectUpdate {
+func (_u *ProductUpdate) RemoveJourneys(v ...*Journey) *ProductUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -238,13 +275,13 @@ func (_u *ProjectUpdate) RemoveJourneys(v ...*Journey) *ProjectUpdate {
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *ProjectUpdate) Save(ctx context.Context) (int, error) {
+func (_u *ProductUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ProjectUpdate) SaveX(ctx context.Context) int {
+func (_u *ProductUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -253,54 +290,54 @@ func (_u *ProjectUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *ProjectUpdate) Exec(ctx context.Context) error {
+func (_u *ProductUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *ProjectUpdate) ExecX(ctx context.Context) {
+func (_u *ProductUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *ProjectUpdate) defaults() {
+func (_u *ProductUpdate) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := project.UpdateDefaultUpdatedAt()
+		v := product.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *ProjectUpdate) check() error {
+func (_u *ProductUpdate) check() error {
 	if v, ok := _u.mutation.Name(); ok {
-		if err := project.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Project.name": %w`, err)}
+		if err := product.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Product.name": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Slug(); ok {
-		if err := project.SlugValidator(v); err != nil {
-			return &ValidationError{Name: "slug", err: fmt.Errorf(`ent: validator failed for field "Project.slug": %w`, err)}
+		if err := product.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`ent: validator failed for field "Product.slug": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.APIKey(); ok {
-		if err := project.APIKeyValidator(v); err != nil {
-			return &ValidationError{Name: "api_key", err: fmt.Errorf(`ent: validator failed for field "Project.api_key": %w`, err)}
+		if err := product.APIKeyValidator(v); err != nil {
+			return &ValidationError{Name: "api_key", err: fmt.Errorf(`ent: validator failed for field "Product.api_key": %w`, err)}
 		}
 	}
 	if _u.mutation.OrganizationCleared() && len(_u.mutation.OrganizationIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Project.organization"`)
+		return errors.New(`ent: clearing a required unique edge "Product.organization"`)
 	}
 	return nil
 }
 
-func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+func (_u *ProductUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(project.Table, project.Columns, sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID))
+	_spec := sqlgraph.NewUpdateSpec(product.Table, product.Columns, sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -309,29 +346,29 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 	}
 	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(project.FieldName, field.TypeString, value)
+		_spec.SetField(product.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Slug(); ok {
-		_spec.SetField(project.FieldSlug, field.TypeString, value)
+		_spec.SetField(product.FieldSlug, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.APIKey(); ok {
-		_spec.SetField(project.FieldAPIKey, field.TypeString, value)
+		_spec.SetField(product.FieldAPIKey, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Settings(); ok {
-		_spec.SetField(project.FieldSettings, field.TypeJSON, value)
+		_spec.SetField(product.FieldSettings, field.TypeJSON, value)
 	}
 	if _u.mutation.SettingsCleared() {
-		_spec.ClearField(project.FieldSettings, field.TypeJSON)
+		_spec.ClearField(product.FieldSettings, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(project.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if _u.mutation.OrganizationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   project.OrganizationTable,
-			Columns: []string{project.OrganizationColumn},
+			Table:   product.OrganizationTable,
+			Columns: []string{product.OrganizationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeUUID),
@@ -343,11 +380,56 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   project.OrganizationTable,
-			Columns: []string{project.OrganizationColumn},
+			Table:   product.OrganizationTable,
+			Columns: []string{product.OrganizationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CapabilitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.CapabilitiesTable,
+			Columns: []string{product.CapabilitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(capability.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCapabilitiesIDs(); len(nodes) > 0 && !_u.mutation.CapabilitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.CapabilitiesTable,
+			Columns: []string{product.CapabilitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(capability.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CapabilitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.CapabilitiesTable,
+			Columns: []string{product.CapabilitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(capability.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -359,8 +441,8 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.EventsTable,
-			Columns: []string{project.EventsColumn},
+			Table:   product.EventsTable,
+			Columns: []string{product.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeUUID),
@@ -372,8 +454,8 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.EventsTable,
-			Columns: []string{project.EventsColumn},
+			Table:   product.EventsTable,
+			Columns: []string{product.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeUUID),
@@ -388,8 +470,8 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.EventsTable,
-			Columns: []string{project.EventsColumn},
+			Table:   product.EventsTable,
+			Columns: []string{product.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeUUID),
@@ -404,8 +486,8 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.SessionsTable,
-			Columns: []string{project.SessionsColumn},
+			Table:   product.SessionsTable,
+			Columns: []string{product.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
@@ -417,8 +499,8 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.SessionsTable,
-			Columns: []string{project.SessionsColumn},
+			Table:   product.SessionsTable,
+			Columns: []string{product.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
@@ -433,8 +515,8 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.SessionsTable,
-			Columns: []string{project.SessionsColumn},
+			Table:   product.SessionsTable,
+			Columns: []string{product.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
@@ -449,8 +531,8 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.JourneysTable,
-			Columns: []string{project.JourneysColumn},
+			Table:   product.JourneysTable,
+			Columns: []string{product.JourneysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(journey.FieldID, field.TypeUUID),
@@ -462,8 +544,8 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.JourneysTable,
-			Columns: []string{project.JourneysColumn},
+			Table:   product.JourneysTable,
+			Columns: []string{product.JourneysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(journey.FieldID, field.TypeUUID),
@@ -478,8 +560,8 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.JourneysTable,
-			Columns: []string{project.JourneysColumn},
+			Table:   product.JourneysTable,
+			Columns: []string{product.JourneysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(journey.FieldID, field.TypeUUID),
@@ -492,7 +574,7 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{project.Label}
+			err = &NotFoundError{product.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -502,22 +584,22 @@ func (_u *ProjectUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	return _node, nil
 }
 
-// ProjectUpdateOne is the builder for updating a single Project entity.
-type ProjectUpdateOne struct {
+// ProductUpdateOne is the builder for updating a single Product entity.
+type ProductUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *ProjectMutation
+	mutation *ProductMutation
 }
 
 // SetOrgID sets the "org_id" field.
-func (_u *ProjectUpdateOne) SetOrgID(v uuid.UUID) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetOrgID(v uuid.UUID) *ProductUpdateOne {
 	_u.mutation.SetOrgID(v)
 	return _u
 }
 
 // SetNillableOrgID sets the "org_id" field if the given value is not nil.
-func (_u *ProjectUpdateOne) SetNillableOrgID(v *uuid.UUID) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetNillableOrgID(v *uuid.UUID) *ProductUpdateOne {
 	if v != nil {
 		_u.SetOrgID(*v)
 	}
@@ -525,13 +607,13 @@ func (_u *ProjectUpdateOne) SetNillableOrgID(v *uuid.UUID) *ProjectUpdateOne {
 }
 
 // SetName sets the "name" field.
-func (_u *ProjectUpdateOne) SetName(v string) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetName(v string) *ProductUpdateOne {
 	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *ProjectUpdateOne) SetNillableName(v *string) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetNillableName(v *string) *ProductUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
 	}
@@ -539,13 +621,13 @@ func (_u *ProjectUpdateOne) SetNillableName(v *string) *ProjectUpdateOne {
 }
 
 // SetSlug sets the "slug" field.
-func (_u *ProjectUpdateOne) SetSlug(v string) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetSlug(v string) *ProductUpdateOne {
 	_u.mutation.SetSlug(v)
 	return _u
 }
 
 // SetNillableSlug sets the "slug" field if the given value is not nil.
-func (_u *ProjectUpdateOne) SetNillableSlug(v *string) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetNillableSlug(v *string) *ProductUpdateOne {
 	if v != nil {
 		_u.SetSlug(*v)
 	}
@@ -553,13 +635,13 @@ func (_u *ProjectUpdateOne) SetNillableSlug(v *string) *ProjectUpdateOne {
 }
 
 // SetAPIKey sets the "api_key" field.
-func (_u *ProjectUpdateOne) SetAPIKey(v string) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetAPIKey(v string) *ProductUpdateOne {
 	_u.mutation.SetAPIKey(v)
 	return _u
 }
 
 // SetNillableAPIKey sets the "api_key" field if the given value is not nil.
-func (_u *ProjectUpdateOne) SetNillableAPIKey(v *string) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetNillableAPIKey(v *string) *ProductUpdateOne {
 	if v != nil {
 		_u.SetAPIKey(*v)
 	}
@@ -567,42 +649,57 @@ func (_u *ProjectUpdateOne) SetNillableAPIKey(v *string) *ProjectUpdateOne {
 }
 
 // SetSettings sets the "settings" field.
-func (_u *ProjectUpdateOne) SetSettings(v map[string]interface{}) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetSettings(v map[string]interface{}) *ProductUpdateOne {
 	_u.mutation.SetSettings(v)
 	return _u
 }
 
 // ClearSettings clears the value of the "settings" field.
-func (_u *ProjectUpdateOne) ClearSettings() *ProjectUpdateOne {
+func (_u *ProductUpdateOne) ClearSettings() *ProductUpdateOne {
 	_u.mutation.ClearSettings()
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *ProjectUpdateOne) SetUpdatedAt(v time.Time) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetUpdatedAt(v time.Time) *ProductUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetOrganizationID sets the "organization" edge to the Organization entity by ID.
-func (_u *ProjectUpdateOne) SetOrganizationID(id uuid.UUID) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetOrganizationID(id uuid.UUID) *ProductUpdateOne {
 	_u.mutation.SetOrganizationID(id)
 	return _u
 }
 
 // SetOrganization sets the "organization" edge to the Organization entity.
-func (_u *ProjectUpdateOne) SetOrganization(v *Organization) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) SetOrganization(v *Organization) *ProductUpdateOne {
 	return _u.SetOrganizationID(v.ID)
 }
 
+// AddCapabilityIDs adds the "capabilities" edge to the Capability entity by IDs.
+func (_u *ProductUpdateOne) AddCapabilityIDs(ids ...uuid.UUID) *ProductUpdateOne {
+	_u.mutation.AddCapabilityIDs(ids...)
+	return _u
+}
+
+// AddCapabilities adds the "capabilities" edges to the Capability entity.
+func (_u *ProductUpdateOne) AddCapabilities(v ...*Capability) *ProductUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCapabilityIDs(ids...)
+}
+
 // AddEventIDs adds the "events" edge to the Event entity by IDs.
-func (_u *ProjectUpdateOne) AddEventIDs(ids ...uuid.UUID) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) AddEventIDs(ids ...uuid.UUID) *ProductUpdateOne {
 	_u.mutation.AddEventIDs(ids...)
 	return _u
 }
 
 // AddEvents adds the "events" edges to the Event entity.
-func (_u *ProjectUpdateOne) AddEvents(v ...*Event) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) AddEvents(v ...*Event) *ProductUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -611,13 +708,13 @@ func (_u *ProjectUpdateOne) AddEvents(v ...*Event) *ProjectUpdateOne {
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (_u *ProjectUpdateOne) AddSessionIDs(ids ...uuid.UUID) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) AddSessionIDs(ids ...uuid.UUID) *ProductUpdateOne {
 	_u.mutation.AddSessionIDs(ids...)
 	return _u
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (_u *ProjectUpdateOne) AddSessions(v ...*Session) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) AddSessions(v ...*Session) *ProductUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -626,13 +723,13 @@ func (_u *ProjectUpdateOne) AddSessions(v ...*Session) *ProjectUpdateOne {
 }
 
 // AddJourneyIDs adds the "journeys" edge to the Journey entity by IDs.
-func (_u *ProjectUpdateOne) AddJourneyIDs(ids ...uuid.UUID) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) AddJourneyIDs(ids ...uuid.UUID) *ProductUpdateOne {
 	_u.mutation.AddJourneyIDs(ids...)
 	return _u
 }
 
 // AddJourneys adds the "journeys" edges to the Journey entity.
-func (_u *ProjectUpdateOne) AddJourneys(v ...*Journey) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) AddJourneys(v ...*Journey) *ProductUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -640,31 +737,52 @@ func (_u *ProjectUpdateOne) AddJourneys(v ...*Journey) *ProjectUpdateOne {
 	return _u.AddJourneyIDs(ids...)
 }
 
-// Mutation returns the ProjectMutation object of the builder.
-func (_u *ProjectUpdateOne) Mutation() *ProjectMutation {
+// Mutation returns the ProductMutation object of the builder.
+func (_u *ProductUpdateOne) Mutation() *ProductMutation {
 	return _u.mutation
 }
 
 // ClearOrganization clears the "organization" edge to the Organization entity.
-func (_u *ProjectUpdateOne) ClearOrganization() *ProjectUpdateOne {
+func (_u *ProductUpdateOne) ClearOrganization() *ProductUpdateOne {
 	_u.mutation.ClearOrganization()
 	return _u
 }
 
+// ClearCapabilities clears all "capabilities" edges to the Capability entity.
+func (_u *ProductUpdateOne) ClearCapabilities() *ProductUpdateOne {
+	_u.mutation.ClearCapabilities()
+	return _u
+}
+
+// RemoveCapabilityIDs removes the "capabilities" edge to Capability entities by IDs.
+func (_u *ProductUpdateOne) RemoveCapabilityIDs(ids ...uuid.UUID) *ProductUpdateOne {
+	_u.mutation.RemoveCapabilityIDs(ids...)
+	return _u
+}
+
+// RemoveCapabilities removes "capabilities" edges to Capability entities.
+func (_u *ProductUpdateOne) RemoveCapabilities(v ...*Capability) *ProductUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCapabilityIDs(ids...)
+}
+
 // ClearEvents clears all "events" edges to the Event entity.
-func (_u *ProjectUpdateOne) ClearEvents() *ProjectUpdateOne {
+func (_u *ProductUpdateOne) ClearEvents() *ProductUpdateOne {
 	_u.mutation.ClearEvents()
 	return _u
 }
 
 // RemoveEventIDs removes the "events" edge to Event entities by IDs.
-func (_u *ProjectUpdateOne) RemoveEventIDs(ids ...uuid.UUID) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) RemoveEventIDs(ids ...uuid.UUID) *ProductUpdateOne {
 	_u.mutation.RemoveEventIDs(ids...)
 	return _u
 }
 
 // RemoveEvents removes "events" edges to Event entities.
-func (_u *ProjectUpdateOne) RemoveEvents(v ...*Event) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) RemoveEvents(v ...*Event) *ProductUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -673,19 +791,19 @@ func (_u *ProjectUpdateOne) RemoveEvents(v ...*Event) *ProjectUpdateOne {
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
-func (_u *ProjectUpdateOne) ClearSessions() *ProjectUpdateOne {
+func (_u *ProductUpdateOne) ClearSessions() *ProductUpdateOne {
 	_u.mutation.ClearSessions()
 	return _u
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (_u *ProjectUpdateOne) RemoveSessionIDs(ids ...uuid.UUID) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) RemoveSessionIDs(ids ...uuid.UUID) *ProductUpdateOne {
 	_u.mutation.RemoveSessionIDs(ids...)
 	return _u
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
-func (_u *ProjectUpdateOne) RemoveSessions(v ...*Session) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) RemoveSessions(v ...*Session) *ProductUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -694,19 +812,19 @@ func (_u *ProjectUpdateOne) RemoveSessions(v ...*Session) *ProjectUpdateOne {
 }
 
 // ClearJourneys clears all "journeys" edges to the Journey entity.
-func (_u *ProjectUpdateOne) ClearJourneys() *ProjectUpdateOne {
+func (_u *ProductUpdateOne) ClearJourneys() *ProductUpdateOne {
 	_u.mutation.ClearJourneys()
 	return _u
 }
 
 // RemoveJourneyIDs removes the "journeys" edge to Journey entities by IDs.
-func (_u *ProjectUpdateOne) RemoveJourneyIDs(ids ...uuid.UUID) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) RemoveJourneyIDs(ids ...uuid.UUID) *ProductUpdateOne {
 	_u.mutation.RemoveJourneyIDs(ids...)
 	return _u
 }
 
 // RemoveJourneys removes "journeys" edges to Journey entities.
-func (_u *ProjectUpdateOne) RemoveJourneys(v ...*Journey) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) RemoveJourneys(v ...*Journey) *ProductUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -714,27 +832,27 @@ func (_u *ProjectUpdateOne) RemoveJourneys(v ...*Journey) *ProjectUpdateOne {
 	return _u.RemoveJourneyIDs(ids...)
 }
 
-// Where appends a list predicates to the ProjectUpdate builder.
-func (_u *ProjectUpdateOne) Where(ps ...predicate.Project) *ProjectUpdateOne {
+// Where appends a list predicates to the ProductUpdate builder.
+func (_u *ProductUpdateOne) Where(ps ...predicate.Product) *ProductUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *ProjectUpdateOne) Select(field string, fields ...string) *ProjectUpdateOne {
+func (_u *ProductUpdateOne) Select(field string, fields ...string) *ProductUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated Project entity.
-func (_u *ProjectUpdateOne) Save(ctx context.Context) (*Project, error) {
+// Save executes the query and returns the updated Product entity.
+func (_u *ProductUpdateOne) Save(ctx context.Context) (*Product, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ProjectUpdateOne) SaveX(ctx context.Context) *Project {
+func (_u *ProductUpdateOne) SaveX(ctx context.Context) *Product {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -743,67 +861,67 @@ func (_u *ProjectUpdateOne) SaveX(ctx context.Context) *Project {
 }
 
 // Exec executes the query on the entity.
-func (_u *ProjectUpdateOne) Exec(ctx context.Context) error {
+func (_u *ProductUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *ProjectUpdateOne) ExecX(ctx context.Context) {
+func (_u *ProductUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *ProjectUpdateOne) defaults() {
+func (_u *ProductUpdateOne) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := project.UpdateDefaultUpdatedAt()
+		v := product.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *ProjectUpdateOne) check() error {
+func (_u *ProductUpdateOne) check() error {
 	if v, ok := _u.mutation.Name(); ok {
-		if err := project.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Project.name": %w`, err)}
+		if err := product.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Product.name": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Slug(); ok {
-		if err := project.SlugValidator(v); err != nil {
-			return &ValidationError{Name: "slug", err: fmt.Errorf(`ent: validator failed for field "Project.slug": %w`, err)}
+		if err := product.SlugValidator(v); err != nil {
+			return &ValidationError{Name: "slug", err: fmt.Errorf(`ent: validator failed for field "Product.slug": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.APIKey(); ok {
-		if err := project.APIKeyValidator(v); err != nil {
-			return &ValidationError{Name: "api_key", err: fmt.Errorf(`ent: validator failed for field "Project.api_key": %w`, err)}
+		if err := product.APIKeyValidator(v); err != nil {
+			return &ValidationError{Name: "api_key", err: fmt.Errorf(`ent: validator failed for field "Product.api_key": %w`, err)}
 		}
 	}
 	if _u.mutation.OrganizationCleared() && len(_u.mutation.OrganizationIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Project.organization"`)
+		return errors.New(`ent: clearing a required unique edge "Product.organization"`)
 	}
 	return nil
 }
 
-func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err error) {
+func (_u *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(project.Table, project.Columns, sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID))
+	_spec := sqlgraph.NewUpdateSpec(product.Table, product.Columns, sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Project.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Product.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, project.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, product.FieldID)
 		for _, f := range fields {
-			if !project.ValidColumn(f) {
+			if !product.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 			}
-			if f != project.FieldID {
+			if f != product.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -816,29 +934,29 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		}
 	}
 	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(project.FieldName, field.TypeString, value)
+		_spec.SetField(product.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Slug(); ok {
-		_spec.SetField(project.FieldSlug, field.TypeString, value)
+		_spec.SetField(product.FieldSlug, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.APIKey(); ok {
-		_spec.SetField(project.FieldAPIKey, field.TypeString, value)
+		_spec.SetField(product.FieldAPIKey, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Settings(); ok {
-		_spec.SetField(project.FieldSettings, field.TypeJSON, value)
+		_spec.SetField(product.FieldSettings, field.TypeJSON, value)
 	}
 	if _u.mutation.SettingsCleared() {
-		_spec.ClearField(project.FieldSettings, field.TypeJSON)
+		_spec.ClearField(product.FieldSettings, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(project.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(product.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if _u.mutation.OrganizationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   project.OrganizationTable,
-			Columns: []string{project.OrganizationColumn},
+			Table:   product.OrganizationTable,
+			Columns: []string{product.OrganizationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeUUID),
@@ -850,11 +968,56 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   project.OrganizationTable,
-			Columns: []string{project.OrganizationColumn},
+			Table:   product.OrganizationTable,
+			Columns: []string{product.OrganizationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(organization.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CapabilitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.CapabilitiesTable,
+			Columns: []string{product.CapabilitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(capability.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCapabilitiesIDs(); len(nodes) > 0 && !_u.mutation.CapabilitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.CapabilitiesTable,
+			Columns: []string{product.CapabilitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(capability.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CapabilitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.CapabilitiesTable,
+			Columns: []string{product.CapabilitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(capability.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -866,8 +1029,8 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.EventsTable,
-			Columns: []string{project.EventsColumn},
+			Table:   product.EventsTable,
+			Columns: []string{product.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeUUID),
@@ -879,8 +1042,8 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.EventsTable,
-			Columns: []string{project.EventsColumn},
+			Table:   product.EventsTable,
+			Columns: []string{product.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeUUID),
@@ -895,8 +1058,8 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.EventsTable,
-			Columns: []string{project.EventsColumn},
+			Table:   product.EventsTable,
+			Columns: []string{product.EventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(event.FieldID, field.TypeUUID),
@@ -911,8 +1074,8 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.SessionsTable,
-			Columns: []string{project.SessionsColumn},
+			Table:   product.SessionsTable,
+			Columns: []string{product.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
@@ -924,8 +1087,8 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.SessionsTable,
-			Columns: []string{project.SessionsColumn},
+			Table:   product.SessionsTable,
+			Columns: []string{product.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
@@ -940,8 +1103,8 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.SessionsTable,
-			Columns: []string{project.SessionsColumn},
+			Table:   product.SessionsTable,
+			Columns: []string{product.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
@@ -956,8 +1119,8 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.JourneysTable,
-			Columns: []string{project.JourneysColumn},
+			Table:   product.JourneysTable,
+			Columns: []string{product.JourneysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(journey.FieldID, field.TypeUUID),
@@ -969,8 +1132,8 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.JourneysTable,
-			Columns: []string{project.JourneysColumn},
+			Table:   product.JourneysTable,
+			Columns: []string{product.JourneysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(journey.FieldID, field.TypeUUID),
@@ -985,8 +1148,8 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   project.JourneysTable,
-			Columns: []string{project.JourneysColumn},
+			Table:   product.JourneysTable,
+			Columns: []string{product.JourneysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(journey.FieldID, field.TypeUUID),
@@ -997,12 +1160,12 @@ func (_u *ProjectUpdateOne) sqlSave(ctx context.Context) (_node *Project, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Project{config: _u.config}
+	_node = &Product{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{project.Label}
+			err = &NotFoundError{product.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

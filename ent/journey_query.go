@@ -14,9 +14,10 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/event"
+	"github.com/plexusone/productgraph/ent/feature"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
@@ -27,7 +28,8 @@ type JourneyQuery struct {
 	order        []journey.OrderOption
 	inters       []Interceptor
 	predicates   []predicate.Journey
-	withProject  *ProjectQuery
+	withProduct  *ProductQuery
+	withFeature  *FeatureQuery
 	withEvents   *EventQuery
 	withSessions *SessionQuery
 	// intermediate query (i.e. traversal path).
@@ -66,9 +68,9 @@ func (_q *JourneyQuery) Order(o ...journey.OrderOption) *JourneyQuery {
 	return _q
 }
 
-// QueryProject chains the current query on the "project" edge.
-func (_q *JourneyQuery) QueryProject() *ProjectQuery {
-	query := (&ProjectClient{config: _q.config}).Query()
+// QueryProduct chains the current query on the "product" edge.
+func (_q *JourneyQuery) QueryProduct() *ProductQuery {
+	query := (&ProductClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -79,8 +81,30 @@ func (_q *JourneyQuery) QueryProject() *ProjectQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(journey.Table, journey.FieldID, selector),
-			sqlgraph.To(project.Table, project.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, journey.ProjectTable, journey.ProjectColumn),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, journey.ProductTable, journey.ProductColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFeature chains the current query on the "feature" edge.
+func (_q *JourneyQuery) QueryFeature() *FeatureQuery {
+	query := (&FeatureClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(journey.Table, journey.FieldID, selector),
+			sqlgraph.To(feature.Table, feature.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, journey.FeatureTable, journey.FeatureColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -324,7 +348,8 @@ func (_q *JourneyQuery) Clone() *JourneyQuery {
 		order:        append([]journey.OrderOption{}, _q.order...),
 		inters:       append([]Interceptor{}, _q.inters...),
 		predicates:   append([]predicate.Journey{}, _q.predicates...),
-		withProject:  _q.withProject.Clone(),
+		withProduct:  _q.withProduct.Clone(),
+		withFeature:  _q.withFeature.Clone(),
 		withEvents:   _q.withEvents.Clone(),
 		withSessions: _q.withSessions.Clone(),
 		// clone intermediate query.
@@ -333,14 +358,25 @@ func (_q *JourneyQuery) Clone() *JourneyQuery {
 	}
 }
 
-// WithProject tells the query-builder to eager-load the nodes that are connected to
-// the "project" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *JourneyQuery) WithProject(opts ...func(*ProjectQuery)) *JourneyQuery {
-	query := (&ProjectClient{config: _q.config}).Query()
+// WithProduct tells the query-builder to eager-load the nodes that are connected to
+// the "product" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *JourneyQuery) WithProduct(opts ...func(*ProductQuery)) *JourneyQuery {
+	query := (&ProductClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withProject = query
+	_q.withProduct = query
+	return _q
+}
+
+// WithFeature tells the query-builder to eager-load the nodes that are connected to
+// the "feature" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *JourneyQuery) WithFeature(opts ...func(*FeatureQuery)) *JourneyQuery {
+	query := (&FeatureClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withFeature = query
 	return _q
 }
 
@@ -444,8 +480,9 @@ func (_q *JourneyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Jour
 	var (
 		nodes       = []*Journey{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
-			_q.withProject != nil,
+		loadedTypes = [4]bool{
+			_q.withProduct != nil,
+			_q.withFeature != nil,
 			_q.withEvents != nil,
 			_q.withSessions != nil,
 		}
@@ -468,9 +505,15 @@ func (_q *JourneyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Jour
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withProject; query != nil {
-		if err := _q.loadProject(ctx, query, nodes, nil,
-			func(n *Journey, e *Project) { n.Edges.Project = e }); err != nil {
+	if query := _q.withProduct; query != nil {
+		if err := _q.loadProduct(ctx, query, nodes, nil,
+			func(n *Journey, e *Product) { n.Edges.Product = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withFeature; query != nil {
+		if err := _q.loadFeature(ctx, query, nodes, nil,
+			func(n *Journey, e *Feature) { n.Edges.Feature = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -491,11 +534,11 @@ func (_q *JourneyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Jour
 	return nodes, nil
 }
 
-func (_q *JourneyQuery) loadProject(ctx context.Context, query *ProjectQuery, nodes []*Journey, init func(*Journey), assign func(*Journey, *Project)) error {
+func (_q *JourneyQuery) loadProduct(ctx context.Context, query *ProductQuery, nodes []*Journey, init func(*Journey), assign func(*Journey, *Product)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*Journey)
 	for i := range nodes {
-		fk := nodes[i].ProjectID
+		fk := nodes[i].ProductID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -504,7 +547,7 @@ func (_q *JourneyQuery) loadProject(ctx context.Context, query *ProjectQuery, no
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(project.IDIn(ids...))
+	query.Where(product.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -512,7 +555,39 @@ func (_q *JourneyQuery) loadProject(ctx context.Context, query *ProjectQuery, no
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "project_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "product_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *JourneyQuery) loadFeature(ctx context.Context, query *FeatureQuery, nodes []*Journey, init func(*Journey), assign func(*Journey, *Feature)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Journey)
+	for i := range nodes {
+		if nodes[i].FeatureID == nil {
+			continue
+		}
+		fk := *nodes[i].FeatureID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(feature.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "feature_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -612,8 +687,11 @@ func (_q *JourneyQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if _q.withProject != nil {
-			_spec.Node.AddColumnOnce(journey.FieldProjectID)
+		if _q.withProduct != nil {
+			_spec.Node.AddColumnOnce(journey.FieldProductID)
+		}
+		if _q.withFeature != nil {
+			_spec.Node.AddColumnOnce(journey.FieldFeatureID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

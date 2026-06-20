@@ -18,8 +18,8 @@ const (
 	FieldID = "id"
 	// FieldOrgID holds the string denoting the org_id field in the database.
 	FieldOrgID = "org_id"
-	// FieldProjectID holds the string denoting the project_id field in the database.
-	FieldProjectID = "project_id"
+	// FieldProductID holds the string denoting the product_id field in the database.
+	FieldProductID = "product_id"
 	// FieldEventID holds the string denoting the event_id field in the database.
 	FieldEventID = "event_id"
 	// FieldSessionID holds the string denoting the session_id field in the database.
@@ -108,19 +108,19 @@ const (
 	FieldMetadata = "metadata"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
-	// EdgeProject holds the string denoting the project edge name in mutations.
-	EdgeProject = "project"
+	// EdgeProduct holds the string denoting the product edge name in mutations.
+	EdgeProduct = "product"
 	// EdgeJourney holds the string denoting the journey edge name in mutations.
 	EdgeJourney = "journey"
 	// Table holds the table name of the event in the database.
 	Table = "events"
-	// ProjectTable is the table that holds the project relation/edge.
-	ProjectTable = "events"
-	// ProjectInverseTable is the table name for the Project entity.
-	// It exists in this package in order to avoid circular dependency with the "project" package.
-	ProjectInverseTable = "projects"
-	// ProjectColumn is the table column denoting the project relation/edge.
-	ProjectColumn = "project_id"
+	// ProductTable is the table that holds the product relation/edge.
+	ProductTable = "events"
+	// ProductInverseTable is the table name for the Product entity.
+	// It exists in this package in order to avoid circular dependency with the "product" package.
+	ProductInverseTable = "products"
+	// ProductColumn is the table column denoting the product relation/edge.
+	ProductColumn = "product_id"
 	// JourneyTable is the table that holds the journey relation/edge.
 	JourneyTable = "events"
 	// JourneyInverseTable is the table name for the Journey entity.
@@ -134,7 +134,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldOrgID,
-	FieldProjectID,
+	FieldProductID,
 	FieldEventID,
 	FieldSessionID,
 	FieldUserID,
@@ -301,9 +301,9 @@ func ByOrgID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOrgID, opts...).ToFunc()
 }
 
-// ByProjectID orders the results by the project_id field.
-func ByProjectID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProjectID, opts...).ToFunc()
+// ByProductID orders the results by the product_id field.
+func ByProductID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProductID, opts...).ToFunc()
 }
 
 // ByEventID orders the results by the event_id field.
@@ -521,10 +521,10 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
-// ByProjectField orders the results by project field.
-func ByProjectField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByProductField orders the results by product field.
+func ByProductField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newProjectStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newProductStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -534,11 +534,11 @@ func ByJourneyField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newJourneyStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newProjectStep() *sqlgraph.Step {
+func newProductStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ProjectInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, ProjectTable, ProjectColumn),
+		sqlgraph.To(ProductInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ProductTable, ProductColumn),
 	)
 }
 func newJourneyStep() *sqlgraph.Step {

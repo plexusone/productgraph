@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/organization"
 	"github.com/plexusone/productgraph/ent/predicate"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 )
 
 // OrganizationUpdate is the builder for updating Organization entities.
@@ -64,19 +64,19 @@ func (_u *OrganizationUpdate) SetUpdatedAt(v time.Time) *OrganizationUpdate {
 	return _u
 }
 
-// AddProjectIDs adds the "projects" edge to the Project entity by IDs.
-func (_u *OrganizationUpdate) AddProjectIDs(ids ...uuid.UUID) *OrganizationUpdate {
-	_u.mutation.AddProjectIDs(ids...)
+// AddProductIDs adds the "products" edge to the Product entity by IDs.
+func (_u *OrganizationUpdate) AddProductIDs(ids ...uuid.UUID) *OrganizationUpdate {
+	_u.mutation.AddProductIDs(ids...)
 	return _u
 }
 
-// AddProjects adds the "projects" edges to the Project entity.
-func (_u *OrganizationUpdate) AddProjects(v ...*Project) *OrganizationUpdate {
+// AddProducts adds the "products" edges to the Product entity.
+func (_u *OrganizationUpdate) AddProducts(v ...*Product) *OrganizationUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddProjectIDs(ids...)
+	return _u.AddProductIDs(ids...)
 }
 
 // Mutation returns the OrganizationMutation object of the builder.
@@ -84,25 +84,25 @@ func (_u *OrganizationUpdate) Mutation() *OrganizationMutation {
 	return _u.mutation
 }
 
-// ClearProjects clears all "projects" edges to the Project entity.
-func (_u *OrganizationUpdate) ClearProjects() *OrganizationUpdate {
-	_u.mutation.ClearProjects()
+// ClearProducts clears all "products" edges to the Product entity.
+func (_u *OrganizationUpdate) ClearProducts() *OrganizationUpdate {
+	_u.mutation.ClearProducts()
 	return _u
 }
 
-// RemoveProjectIDs removes the "projects" edge to Project entities by IDs.
-func (_u *OrganizationUpdate) RemoveProjectIDs(ids ...uuid.UUID) *OrganizationUpdate {
-	_u.mutation.RemoveProjectIDs(ids...)
+// RemoveProductIDs removes the "products" edge to Product entities by IDs.
+func (_u *OrganizationUpdate) RemoveProductIDs(ids ...uuid.UUID) *OrganizationUpdate {
+	_u.mutation.RemoveProductIDs(ids...)
 	return _u
 }
 
-// RemoveProjects removes "projects" edges to Project entities.
-func (_u *OrganizationUpdate) RemoveProjects(v ...*Project) *OrganizationUpdate {
+// RemoveProducts removes "products" edges to Product entities.
+func (_u *OrganizationUpdate) RemoveProducts(v ...*Product) *OrganizationUpdate {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveProjectIDs(ids...)
+	return _u.RemoveProductIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -177,28 +177,28 @@ func (_u *OrganizationUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(organization.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.ProjectsCleared() {
+	if _u.mutation.ProductsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   organization.ProjectsTable,
-			Columns: []string{organization.ProjectsColumn},
+			Table:   organization.ProductsTable,
+			Columns: []string{organization.ProductsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedProjectsIDs(); len(nodes) > 0 && !_u.mutation.ProjectsCleared() {
+	if nodes := _u.mutation.RemovedProductsIDs(); len(nodes) > 0 && !_u.mutation.ProductsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   organization.ProjectsTable,
-			Columns: []string{organization.ProjectsColumn},
+			Table:   organization.ProductsTable,
+			Columns: []string{organization.ProductsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -206,15 +206,15 @@ func (_u *OrganizationUpdate) sqlSave(ctx context.Context) (_node int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ProjectsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ProductsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   organization.ProjectsTable,
-			Columns: []string{organization.ProjectsColumn},
+			Table:   organization.ProductsTable,
+			Columns: []string{organization.ProductsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -276,19 +276,19 @@ func (_u *OrganizationUpdateOne) SetUpdatedAt(v time.Time) *OrganizationUpdateOn
 	return _u
 }
 
-// AddProjectIDs adds the "projects" edge to the Project entity by IDs.
-func (_u *OrganizationUpdateOne) AddProjectIDs(ids ...uuid.UUID) *OrganizationUpdateOne {
-	_u.mutation.AddProjectIDs(ids...)
+// AddProductIDs adds the "products" edge to the Product entity by IDs.
+func (_u *OrganizationUpdateOne) AddProductIDs(ids ...uuid.UUID) *OrganizationUpdateOne {
+	_u.mutation.AddProductIDs(ids...)
 	return _u
 }
 
-// AddProjects adds the "projects" edges to the Project entity.
-func (_u *OrganizationUpdateOne) AddProjects(v ...*Project) *OrganizationUpdateOne {
+// AddProducts adds the "products" edges to the Product entity.
+func (_u *OrganizationUpdateOne) AddProducts(v ...*Product) *OrganizationUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddProjectIDs(ids...)
+	return _u.AddProductIDs(ids...)
 }
 
 // Mutation returns the OrganizationMutation object of the builder.
@@ -296,25 +296,25 @@ func (_u *OrganizationUpdateOne) Mutation() *OrganizationMutation {
 	return _u.mutation
 }
 
-// ClearProjects clears all "projects" edges to the Project entity.
-func (_u *OrganizationUpdateOne) ClearProjects() *OrganizationUpdateOne {
-	_u.mutation.ClearProjects()
+// ClearProducts clears all "products" edges to the Product entity.
+func (_u *OrganizationUpdateOne) ClearProducts() *OrganizationUpdateOne {
+	_u.mutation.ClearProducts()
 	return _u
 }
 
-// RemoveProjectIDs removes the "projects" edge to Project entities by IDs.
-func (_u *OrganizationUpdateOne) RemoveProjectIDs(ids ...uuid.UUID) *OrganizationUpdateOne {
-	_u.mutation.RemoveProjectIDs(ids...)
+// RemoveProductIDs removes the "products" edge to Product entities by IDs.
+func (_u *OrganizationUpdateOne) RemoveProductIDs(ids ...uuid.UUID) *OrganizationUpdateOne {
+	_u.mutation.RemoveProductIDs(ids...)
 	return _u
 }
 
-// RemoveProjects removes "projects" edges to Project entities.
-func (_u *OrganizationUpdateOne) RemoveProjects(v ...*Project) *OrganizationUpdateOne {
+// RemoveProducts removes "products" edges to Product entities.
+func (_u *OrganizationUpdateOne) RemoveProducts(v ...*Product) *OrganizationUpdateOne {
 	ids := make([]uuid.UUID, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveProjectIDs(ids...)
+	return _u.RemoveProductIDs(ids...)
 }
 
 // Where appends a list predicates to the OrganizationUpdate builder.
@@ -419,28 +419,28 @@ func (_u *OrganizationUpdateOne) sqlSave(ctx context.Context) (_node *Organizati
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(organization.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.ProjectsCleared() {
+	if _u.mutation.ProductsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   organization.ProjectsTable,
-			Columns: []string{organization.ProjectsColumn},
+			Table:   organization.ProductsTable,
+			Columns: []string{organization.ProductsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedProjectsIDs(); len(nodes) > 0 && !_u.mutation.ProjectsCleared() {
+	if nodes := _u.mutation.RemovedProductsIDs(); len(nodes) > 0 && !_u.mutation.ProductsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   organization.ProjectsTable,
-			Columns: []string{organization.ProjectsColumn},
+			Table:   organization.ProductsTable,
+			Columns: []string{organization.ProductsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -448,15 +448,15 @@ func (_u *OrganizationUpdateOne) sqlSave(ctx context.Context) (_node *Organizati
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ProjectsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ProductsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   organization.ProjectsTable,
-			Columns: []string{organization.ProjectsColumn},
+			Table:   organization.ProductsTable,
+			Columns: []string{organization.ProductsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(project.FieldID, field.TypeUUID),
+				IDSpec: sqlgraph.NewFieldSpec(product.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

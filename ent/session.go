@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/plexusone/productgraph/ent/journey"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/session"
 )
 
@@ -22,8 +22,8 @@ type Session struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// OrgID holds the value of the "org_id" field.
 	OrgID uuid.UUID `json:"org_id,omitempty"`
-	// ProjectID holds the value of the "project_id" field.
-	ProjectID uuid.UUID `json:"project_id,omitempty"`
+	// ProductID holds the value of the "product_id" field.
+	ProductID uuid.UUID `json:"product_id,omitempty"`
 	// SessionID holds the value of the "session_id" field.
 	SessionID string `json:"session_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
@@ -74,8 +74,8 @@ type Session struct {
 
 // SessionEdges holds the relations/edges for other nodes in the graph.
 type SessionEdges struct {
-	// Project holds the value of the project edge.
-	Project *Project `json:"project,omitempty"`
+	// Product holds the value of the product edge.
+	Product *Product `json:"product,omitempty"`
 	// Journey holds the value of the journey edge.
 	Journey *Journey `json:"journey,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -83,15 +83,15 @@ type SessionEdges struct {
 	loadedTypes [2]bool
 }
 
-// ProjectOrErr returns the Project value or an error if the edge
+// ProductOrErr returns the Product value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e SessionEdges) ProjectOrErr() (*Project, error) {
-	if e.Project != nil {
-		return e.Project, nil
+func (e SessionEdges) ProductOrErr() (*Product, error) {
+	if e.Product != nil {
+		return e.Product, nil
 	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: project.Label}
+		return nil, &NotFoundError{label: product.Label}
 	}
-	return nil, &NotLoadedError{edge: "project"}
+	return nil, &NotLoadedError{edge: "product"}
 }
 
 // JourneyOrErr returns the Journey value or an error if the edge
@@ -118,7 +118,7 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case session.FieldStartedAt, session.FieldEndedAt, session.FieldCreatedAt, session.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case session.FieldID, session.FieldOrgID, session.FieldProjectID:
+		case session.FieldID, session.FieldOrgID, session.FieldProductID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -147,11 +147,11 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.OrgID = *value
 			}
-		case session.FieldProjectID:
+		case session.FieldProductID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field project_id", values[i])
+				return fmt.Errorf("unexpected type %T for field product_id", values[i])
 			} else if value != nil {
-				_m.ProjectID = *value
+				_m.ProductID = *value
 			}
 		case session.FieldSessionID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -294,9 +294,9 @@ func (_m *Session) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryProject queries the "project" edge of the Session entity.
-func (_m *Session) QueryProject() *ProjectQuery {
-	return NewSessionClient(_m.config).QueryProject(_m)
+// QueryProduct queries the "product" edge of the Session entity.
+func (_m *Session) QueryProduct() *ProductQuery {
+	return NewSessionClient(_m.config).QueryProduct(_m)
 }
 
 // QueryJourney queries the "journey" edge of the Session entity.
@@ -330,8 +330,8 @@ func (_m *Session) String() string {
 	builder.WriteString("org_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrgID))
 	builder.WriteString(", ")
-	builder.WriteString("project_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ProjectID))
+	builder.WriteString("product_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProductID))
 	builder.WriteString(", ")
 	builder.WriteString("session_id=")
 	builder.WriteString(_m.SessionID)

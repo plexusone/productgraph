@@ -22,7 +22,7 @@ func (Session) Fields() []ent.Field {
 			Default(uuid.New).
 			Immutable(),
 		field.UUID("org_id", uuid.UUID{}), // RLS column
-		field.UUID("project_id", uuid.UUID{}),
+		field.UUID("product_id", uuid.UUID{}),
 		field.String("session_id").
 			NotEmpty().
 			MaxLen(255),
@@ -99,9 +99,9 @@ func (Session) Fields() []ent.Field {
 // Edges of the Session.
 func (Session) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("project", Project.Type).
+		edge.From("product", Product.Type).
 			Ref("sessions").
-			Field("project_id").
+			Field("product_id").
 			Unique().
 			Required(),
 		edge.From("journey", Journey.Type).
@@ -114,12 +114,12 @@ func (Session) Edges() []ent.Edge {
 // Indexes of the Session.
 func (Session) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("org_id", "project_id", "started_at"),
+		index.Fields("org_id", "product_id", "started_at"),
 		index.Fields("org_id", "session_id"),
 		index.Fields("org_id", "user_id"),
 		index.Fields("org_id", "journey_id"),
 		index.Fields("org_id", "conversion_status"),
-		// Unique constraint for session_id within project
-		index.Fields("project_id", "session_id").Unique(),
+		// Unique constraint for session_id within product
+		index.Fields("product_id", "session_id").Unique(),
 	}
 }

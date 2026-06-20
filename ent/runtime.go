@@ -6,10 +6,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/plexusone/productgraph/ent/capability"
 	"github.com/plexusone/productgraph/ent/event"
+	"github.com/plexusone/productgraph/ent/feature"
 	"github.com/plexusone/productgraph/ent/journey"
 	"github.com/plexusone/productgraph/ent/organization"
-	"github.com/plexusone/productgraph/ent/project"
+	"github.com/plexusone/productgraph/ent/product"
 	"github.com/plexusone/productgraph/ent/schema"
 	"github.com/plexusone/productgraph/ent/session"
 )
@@ -18,6 +20,44 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	capabilityFields := schema.Capability{}.Fields()
+	_ = capabilityFields
+	// capabilityDescName is the schema descriptor for name field.
+	capabilityDescName := capabilityFields[3].Descriptor()
+	// capability.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	capability.NameValidator = func() func(string) error {
+		validators := capabilityDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// capabilityDescDisplayOrder is the schema descriptor for display_order field.
+	capabilityDescDisplayOrder := capabilityFields[5].Descriptor()
+	// capability.DefaultDisplayOrder holds the default value on creation for the display_order field.
+	capability.DefaultDisplayOrder = capabilityDescDisplayOrder.Default.(int)
+	// capabilityDescCreatedAt is the schema descriptor for created_at field.
+	capabilityDescCreatedAt := capabilityFields[6].Descriptor()
+	// capability.DefaultCreatedAt holds the default value on creation for the created_at field.
+	capability.DefaultCreatedAt = capabilityDescCreatedAt.Default.(func() time.Time)
+	// capabilityDescUpdatedAt is the schema descriptor for updated_at field.
+	capabilityDescUpdatedAt := capabilityFields[7].Descriptor()
+	// capability.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	capability.DefaultUpdatedAt = capabilityDescUpdatedAt.Default.(func() time.Time)
+	// capability.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	capability.UpdateDefaultUpdatedAt = capabilityDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// capabilityDescID is the schema descriptor for id field.
+	capabilityDescID := capabilityFields[0].Descriptor()
+	// capability.DefaultID holds the default value on creation for the id field.
+	capability.DefaultID = capabilityDescID.Default.(func() uuid.UUID)
 	eventFields := schema.Event{}.Fields()
 	_ = eventFields
 	// eventDescEventID is the schema descriptor for event_id field.
@@ -164,10 +204,52 @@ func init() {
 	eventDescID := eventFields[0].Descriptor()
 	// event.DefaultID holds the default value on creation for the id field.
 	event.DefaultID = eventDescID.Default.(func() uuid.UUID)
+	featureFields := schema.Feature{}.Fields()
+	_ = featureFields
+	// featureDescName is the schema descriptor for name field.
+	featureDescName := featureFields[4].Descriptor()
+	// feature.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	feature.NameValidator = func() func(string) error {
+		validators := featureDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// featureDescAdminPath is the schema descriptor for admin_path field.
+	featureDescAdminPath := featureFields[6].Descriptor()
+	// feature.AdminPathValidator is a validator for the "admin_path" field. It is called by the builders before save.
+	feature.AdminPathValidator = featureDescAdminPath.Validators[0].(func(string) error)
+	// featureDescDisplayOrder is the schema descriptor for display_order field.
+	featureDescDisplayOrder := featureFields[9].Descriptor()
+	// feature.DefaultDisplayOrder holds the default value on creation for the display_order field.
+	feature.DefaultDisplayOrder = featureDescDisplayOrder.Default.(int)
+	// featureDescCreatedAt is the schema descriptor for created_at field.
+	featureDescCreatedAt := featureFields[10].Descriptor()
+	// feature.DefaultCreatedAt holds the default value on creation for the created_at field.
+	feature.DefaultCreatedAt = featureDescCreatedAt.Default.(func() time.Time)
+	// featureDescUpdatedAt is the schema descriptor for updated_at field.
+	featureDescUpdatedAt := featureFields[11].Descriptor()
+	// feature.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	feature.DefaultUpdatedAt = featureDescUpdatedAt.Default.(func() time.Time)
+	// feature.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	feature.UpdateDefaultUpdatedAt = featureDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// featureDescID is the schema descriptor for id field.
+	featureDescID := featureFields[0].Descriptor()
+	// feature.DefaultID holds the default value on creation for the id field.
+	feature.DefaultID = featureDescID.Default.(func() uuid.UUID)
 	journeyFields := schema.Journey{}.Fields()
 	_ = journeyFields
 	// journeyDescName is the schema descriptor for name field.
-	journeyDescName := journeyFields[3].Descriptor()
+	journeyDescName := journeyFields[4].Descriptor()
 	// journey.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	journey.NameValidator = func() func(string) error {
 		validators := journeyDescName.Validators
@@ -185,35 +267,35 @@ func init() {
 		}
 	}()
 	// journeyDescTimeoutMinutes is the schema descriptor for timeout_minutes field.
-	journeyDescTimeoutMinutes := journeyFields[8].Descriptor()
+	journeyDescTimeoutMinutes := journeyFields[9].Descriptor()
 	// journey.DefaultTimeoutMinutes holds the default value on creation for the timeout_minutes field.
 	journey.DefaultTimeoutMinutes = journeyDescTimeoutMinutes.Default.(int)
 	// journeyDescTotalSessions is the schema descriptor for total_sessions field.
-	journeyDescTotalSessions := journeyFields[9].Descriptor()
+	journeyDescTotalSessions := journeyFields[10].Descriptor()
 	// journey.DefaultTotalSessions holds the default value on creation for the total_sessions field.
 	journey.DefaultTotalSessions = journeyDescTotalSessions.Default.(int64)
 	// journeyDescConvertedSessions is the schema descriptor for converted_sessions field.
-	journeyDescConvertedSessions := journeyFields[10].Descriptor()
+	journeyDescConvertedSessions := journeyFields[11].Descriptor()
 	// journey.DefaultConvertedSessions holds the default value on creation for the converted_sessions field.
 	journey.DefaultConvertedSessions = journeyDescConvertedSessions.Default.(int64)
 	// journeyDescConversionRate is the schema descriptor for conversion_rate field.
-	journeyDescConversionRate := journeyFields[11].Descriptor()
+	journeyDescConversionRate := journeyFields[12].Descriptor()
 	// journey.DefaultConversionRate holds the default value on creation for the conversion_rate field.
 	journey.DefaultConversionRate = journeyDescConversionRate.Default.(float64)
 	// journeyDescAvgDurationMs is the schema descriptor for avg_duration_ms field.
-	journeyDescAvgDurationMs := journeyFields[12].Descriptor()
+	journeyDescAvgDurationMs := journeyFields[13].Descriptor()
 	// journey.DefaultAvgDurationMs holds the default value on creation for the avg_duration_ms field.
 	journey.DefaultAvgDurationMs = journeyDescAvgDurationMs.Default.(int64)
 	// journeyDescIsActive is the schema descriptor for is_active field.
-	journeyDescIsActive := journeyFields[13].Descriptor()
+	journeyDescIsActive := journeyFields[14].Descriptor()
 	// journey.DefaultIsActive holds the default value on creation for the is_active field.
 	journey.DefaultIsActive = journeyDescIsActive.Default.(bool)
 	// journeyDescCreatedAt is the schema descriptor for created_at field.
-	journeyDescCreatedAt := journeyFields[14].Descriptor()
+	journeyDescCreatedAt := journeyFields[15].Descriptor()
 	// journey.DefaultCreatedAt holds the default value on creation for the created_at field.
 	journey.DefaultCreatedAt = journeyDescCreatedAt.Default.(func() time.Time)
 	// journeyDescUpdatedAt is the schema descriptor for updated_at field.
-	journeyDescUpdatedAt := journeyFields[15].Descriptor()
+	journeyDescUpdatedAt := journeyFields[16].Descriptor()
 	// journey.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	journey.DefaultUpdatedAt = journeyDescUpdatedAt.Default.(func() time.Time)
 	// journey.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
@@ -274,13 +356,13 @@ func init() {
 	organizationDescID := organizationFields[0].Descriptor()
 	// organization.DefaultID holds the default value on creation for the id field.
 	organization.DefaultID = organizationDescID.Default.(func() uuid.UUID)
-	projectFields := schema.Project{}.Fields()
-	_ = projectFields
-	// projectDescName is the schema descriptor for name field.
-	projectDescName := projectFields[2].Descriptor()
-	// project.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	project.NameValidator = func() func(string) error {
-		validators := projectDescName.Validators
+	productFields := schema.Product{}.Fields()
+	_ = productFields
+	// productDescName is the schema descriptor for name field.
+	productDescName := productFields[2].Descriptor()
+	// product.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	product.NameValidator = func() func(string) error {
+		validators := productDescName.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
@@ -294,11 +376,11 @@ func init() {
 			return nil
 		}
 	}()
-	// projectDescSlug is the schema descriptor for slug field.
-	projectDescSlug := projectFields[3].Descriptor()
-	// project.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
-	project.SlugValidator = func() func(string) error {
-		validators := projectDescSlug.Validators
+	// productDescSlug is the schema descriptor for slug field.
+	productDescSlug := productFields[3].Descriptor()
+	// product.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	product.SlugValidator = func() func(string) error {
+		validators := productDescSlug.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
@@ -312,11 +394,11 @@ func init() {
 			return nil
 		}
 	}()
-	// projectDescAPIKey is the schema descriptor for api_key field.
-	projectDescAPIKey := projectFields[4].Descriptor()
-	// project.APIKeyValidator is a validator for the "api_key" field. It is called by the builders before save.
-	project.APIKeyValidator = func() func(string) error {
-		validators := projectDescAPIKey.Validators
+	// productDescAPIKey is the schema descriptor for api_key field.
+	productDescAPIKey := productFields[4].Descriptor()
+	// product.APIKeyValidator is a validator for the "api_key" field. It is called by the builders before save.
+	product.APIKeyValidator = func() func(string) error {
+		validators := productDescAPIKey.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
@@ -330,20 +412,20 @@ func init() {
 			return nil
 		}
 	}()
-	// projectDescCreatedAt is the schema descriptor for created_at field.
-	projectDescCreatedAt := projectFields[6].Descriptor()
-	// project.DefaultCreatedAt holds the default value on creation for the created_at field.
-	project.DefaultCreatedAt = projectDescCreatedAt.Default.(func() time.Time)
-	// projectDescUpdatedAt is the schema descriptor for updated_at field.
-	projectDescUpdatedAt := projectFields[7].Descriptor()
-	// project.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	project.DefaultUpdatedAt = projectDescUpdatedAt.Default.(func() time.Time)
-	// project.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	project.UpdateDefaultUpdatedAt = projectDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// projectDescID is the schema descriptor for id field.
-	projectDescID := projectFields[0].Descriptor()
-	// project.DefaultID holds the default value on creation for the id field.
-	project.DefaultID = projectDescID.Default.(func() uuid.UUID)
+	// productDescCreatedAt is the schema descriptor for created_at field.
+	productDescCreatedAt := productFields[6].Descriptor()
+	// product.DefaultCreatedAt holds the default value on creation for the created_at field.
+	product.DefaultCreatedAt = productDescCreatedAt.Default.(func() time.Time)
+	// productDescUpdatedAt is the schema descriptor for updated_at field.
+	productDescUpdatedAt := productFields[7].Descriptor()
+	// product.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	product.DefaultUpdatedAt = productDescUpdatedAt.Default.(func() time.Time)
+	// product.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	product.UpdateDefaultUpdatedAt = productDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// productDescID is the schema descriptor for id field.
+	productDescID := productFields[0].Descriptor()
+	// product.DefaultID holds the default value on creation for the id field.
+	product.DefaultID = productDescID.Default.(func() uuid.UUID)
 	sessionFields := schema.Session{}.Fields()
 	_ = sessionFields
 	// sessionDescSessionID is the schema descriptor for session_id field.
