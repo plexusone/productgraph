@@ -7,6 +7,38 @@
   "maintainers": ["plexusone", "johncwang@gmail.com"],
   "releases": [
     {
+      "version": "v0.3.0",
+      "date": "2026-06-20",
+      "commit": "0804bba",
+      "highlights": [
+        { "description": "Product catalog modeling with Capability and Feature entities" },
+        { "description": "Replace Project entity with Product for clearer domain modeling" },
+        { "description": "CLI tooling for capability catalog management" }
+      ],
+      "breaking": [
+        { "description": "Project entity renamed to Product; `project_id` field renamed to `product_id` in event payloads and database schemas", "commit": "f6a43b7" }
+      ],
+      "added": [
+        { "description": "Product entity replacing Project with capabilities edge", "commit": "f6a43b7" },
+        { "description": "Capability entity for modeling major functional areas within a Product", "commit": "f6a43b7" },
+        { "description": "Feature entity for specific functionality within a Capability", "commit": "f6a43b7" },
+        { "description": "Journey can now optionally link to a Feature via `feature_id`", "commit": "f6a43b7" },
+        { "description": "Capability catalog types (`CapabilityCatalog`, `Capability`, `Feature`) for import/export", "commit": "5010c77" },
+        { "description": "`schemagen` CLI tool for JSON Schema generation from Go types", "commit": "68b5598" },
+        { "description": "Embedded JSON Schema for capability catalog validation", "commit": "81c2bee" },
+        { "description": "`catalog2md` CLI tool for converting catalogs to markdown", "commit": "45c0de8" },
+        { "description": "`catalogctl` CLI with validate and convert commands", "commit": "0804bba" }
+      ],
+      "changed": [
+        { "description": "Event schema: `ProjectID` renamed to `ProductID`", "commit": "34b7c9d" },
+        { "description": "Analytics adapter updated for product_id field", "commit": "01e2867" }
+      ],
+      "dependencies": [
+        { "description": "github.com/spf13/cobra v1.10.2", "commit": "a7740d6" },
+        { "description": "github.com/invopop/jsonschema v0.14.0", "commit": "a7740d6" }
+      ]
+    },
+    {
       "version": "v0.2.0",
       "date": "2026-04-27",
       "commit": "5b77fc4",
