@@ -2,70 +2,74 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://plexusone.github.io/productgraph/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/changelog/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/api/events/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/architecture/overview/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/architecture/scaling/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/design/ideation/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/design/prd/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/design/architecture/SCALING/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/design/architecture/TRD/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/design/ideation/figma-ai-canvas/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/design/overview/PRD/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/design/v0.2.0/IDEATION/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/getting-started/installation/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/getting-started/quickstart/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/integrations/analytics/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/releases/v0.1.0/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
     </url>
     <url>
          <loc>https://plexusone.github.io/productgraph/releases/v0.2.0/</loc>
-         <lastmod>2026-04-27</lastmod>
+         <lastmod>2026-06-20</lastmod>
+    </url>
+    <url>
+         <loc>https://plexusone.github.io/productgraph/releases/v0.3.0/</loc>
+         <lastmod>2026-06-20</lastmod>
     </url>
 </urlset>
