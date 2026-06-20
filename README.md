@@ -78,7 +78,7 @@ The PoC architecture uses a single PostgreSQL database with Row-Level Security (
                       │  │  Events  │  │  Sessions  │  │
                       │  └──────────┘  └────────────┘  │
                       │  ┌──────────┐  ┌────────────┐  │
-                      │  │ Journeys │  │  Projects  │  │
+                      │  │ Journeys │  │  Products  │  │
                       │  └──────────┘  └────────────┘  │
                       │  ┌──────────┐  ┌────────────┐  │
                       │  │   Orgs   │  │ Snapshots  │  │
@@ -140,7 +140,7 @@ curl -X POST http://localhost:8080/v1/events \
   -d '{
     "events": [{
       "event_id": "evt_001",
-      "project_id": "proj_demo",
+      "product_id": "prod_demo",
       "session.id": "sess_001",
       "event.type": "page.view",
       "event.timestamp": "2024-01-15T10:30:00Z",
@@ -177,7 +177,7 @@ Ingest a batch of events.
   "events": [
     {
       "event_id": "string (required)",
-      "project_id": "string (required)",
+      "product_id": "string (required)",
       "session.id": "string (required)",
       "event.type": "string (required)",
       "event.timestamp": "ISO8601 (required)",

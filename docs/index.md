@@ -52,7 +52,7 @@ The Starter architecture uses a single PostgreSQL database with Row-Level Securi
                       │  │  Events  │  │  Sessions  │  │
                       │  └──────────┘  └────────────┘  │
                       │  ┌──────────┐  ┌────────────┐  │
-                      │  │ Journeys │  │  Projects  │  │
+                      │  │ Journeys │  │  Products  │  │
                       │  └──────────┘  └────────────┘  │
                       └────────────────────────────────┘
                                        ▲
